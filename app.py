@@ -76,4 +76,7 @@ def submit():
         return jsonify({"status": "error", "message": str(e)}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Render provides a $PORT environment variable
+    port = int(os.environ.get("PORT", 5000))
+    # host='0.0.0.0' is required for cloud hosting
+    app.run(host='0.0.0.0', port=port)
