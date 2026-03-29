@@ -7,14 +7,18 @@ from google.oauth2.service_account import Credentials
 
 app = Flask(__name__)
 
-# --- CONFIGURATION ---
-SHEET_NAME = "Autofill Data Entry Sheet" 
+# --- THE ENV WAY ---
+# os.environ.get("KEY") looks for a setting on Render or your PC.
+# The second part is a "default" just in case you forget to set it.
+SHEET_NAME = os.environ.get("GOOGLE_SHEET_NAME", "My_Default_Sheet")
+TAB_NAME = os.environ.get("GOOGLE_TAB_NAME", "Sheet1")
 
 def get_google_sheet():
     scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
     creds = Credentials.from_service_account_file("google_creds.json", scopes=scope)
     client = gspread.authorize(creds)
-    return client.open(SHEET_NAME).sheet1
+
+    return client.open(SHEET_NAME).worksheet(TAB_NAME)
 
 @app.route('/')
 def index():
