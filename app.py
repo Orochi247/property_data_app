@@ -1,4 +1,5 @@
 import os
+import json
 from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 import gspread
@@ -17,7 +18,15 @@ def get_google_sheet():
 
 @app.route('/')
 def index():
-    mls_list = ["MLS North", "MLS South", "MLS West", "MLS East", "California MLS", "Texas MLS"]
+    try:
+        with open('mls_data.json', 'r') as f:
+            data = json.load(f)
+            mls_list = data.get('mls_names', [])
+    except Exception as e:
+        # Fallback if json file is not found
+        mls_list = ["Error loading MLS List"]
+        print = (f'JSON Error: {e}')
+    
     return render_template('index.html', mls_list=sorted(mls_list))
 
 @app.route('/get_recent', methods=['GET'])
