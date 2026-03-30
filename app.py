@@ -94,7 +94,11 @@ if __name__ == '__main__':
     # host='0.0.0.0' is required for cloud hosting
     app.run(host='0.0.0.0', port=port)
 
-    # new features to add in web app
-    # add date input
+    # new features to add in web app 
+    # add listing date input
     # add a duplicate check pointer
-    # try zoho api check, in built just getting there we get a successfull json in return or not 
+    # try zoho api check, in built just getting there we get a successfull json in return or not
+    # fix saving and submit buttom, saving button not changing to submit after successfull entry
+    # option to edit previous entry in the bottom recent entries
+    # add hometype field with options (Single Family Residence, Condo, Mobile, Manufactured)
+    # add user name of who is entering the data, name should remain constant on the browser throughout the data entry session
