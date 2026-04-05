@@ -60,7 +60,7 @@ def submit():
         if hid in existing_hids:
             # return a bad request error for duplicate error message
             return jsonify({
-                "status" : "error"
+                "status" : "error",
                 "message" : f"Duplicate Alert: HID {hid} has already been entered!"
             }), 400
 
@@ -81,11 +81,12 @@ def submit():
         time_taken_string = f"{hours} H {minutes} M"
 
         new_row = [
-            data.get('hid'),
+            hid,
             data.get('user_name'),
             data.get('mls_name'),
             data.get('prop_type'),
             data.get('home_type'),
+            data.get('listing_date'),   
             data.get('status'),
             time_taken_string, # Combined string here
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")
