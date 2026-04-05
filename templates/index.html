@@ -128,10 +128,11 @@
         let html = '';
         data.forEach(row => {
             html += `<tr>
-                <td><strong>${row[0]}</strong></td>
+                <td><strong>${row[0]}</strong></td> 
             <td>${row[1]}</td> 
-            <td><span class="badge bg-info text-dark">${row[2]}</span></td> 
-            <td>${row[3]}</td> <td>${row[4]}</td> 
+            <td>${row[2]}</td> 
+            <td><span class="badge bg-info text-dark"">${row[3]}</span></td> 
+            <td>${row[4]}</td> 
             <td>${row[5] === 'Found' ? '✅' : '❌'}</td> 
             <td>${row[6]}</td> 
             </tr>`;
