@@ -25,6 +25,15 @@
             <div class="card p-4">
                 <h2 class="header-title text-center mb-4">🏠 Autofill Entry Tracker</h2>
                 <form id="dataForm">
+                    <div class="mb-3">
+    <label for="user_name" class="form-label fw-bold">Data Entry User</label>
+    <select class="form-select" id="user_name" required>
+        <option value="" disabled selected>Select your name...</option>
+        <option value="Alice">Alice</option>
+        <option value="Bob">Bob</option>
+        <option value="Ryan">Ryan</option> </select>
+</div>
+                    
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">HID</label>
@@ -46,6 +55,21 @@
                                 <option>Condo</option><option>Townhouse</option><option>Mobile</option>
                             </select>
                         </div>
+                        
+    <div class="col-md-6 mb-3">
+        <label for="home_type" class="form-label fw-bold">Home Type</label>
+        <select class="form-select" id="home_type" required>
+            <option value="" disabled selected>Select...</option>
+            <option value="Single Family Residence">Single Family Residence</option>
+            <option value="Condo">Condo</option>
+            <option value="Mobile">Mobile</option>
+            <option value="Manufactured">Manufactured</option>
+        </select>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label for="listing_date" class="form-label fw-bold">Listing Date</label>
+        <input type="date" class="form-control" id="listing_date" required>
+    </div>
                         <div class="col-md-6">
                             <label class="form-label">Status</label>
                             <select id="status" class="form-select">
@@ -81,7 +105,7 @@
                     <table class="table align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th>HID</th><th>MLS</th><th>Type</th><th>Status</th><th>Duration</th><th>Timestamp</th>
+                                <th>HID</th><th>User</th><th>MLS</th><th>Type</th><th>Listing Date</th><th>Status</th><th>Duration</th><th>Timestamp</th>
                             </tr>
                         </thead>
                         <tbody id="entriesBody">
@@ -105,33 +129,51 @@
         data.forEach(row => {
             html += `<tr>
                 <td><strong>${row[0]}</strong></td>
-                <td>${row[1]}</td>
-                <td><span class="badge bg-info text-dark">${row[2]}</span></td>
-                <td>${row[3] === 'Found' ? '✅' : '❌'}</td>
-                <td>${row[4]}</td> <td><small>${row[5]}</small></td>
+            <td>${row[1]}</td> 
+            <td><span class="badge bg-info text-dark">${row[2]}</span></td> 
+            <td>${row[3]}</td> <td>${row[4]}</td> 
+            <td>${row[5] === 'Found' ? '✅' : '❌'}</td> 
+            <td>${row[6]}</td> 
             </tr>`;
         });
-        $('#entriesBody').html(html || '<tr><td colspan="6" class="text-center">No data found</td></tr>');
+        $('#entriesBody').html(html || '<tr><td colspan="7" class="text-center">No data found</td></tr>');
     }
 
     $(document).ready(function() {
         $('.searchable-select').select2();
         flatpickr(".time-picker", { enableTime: true, noCalendar: true, dateFormat: "H:i:S", time_24hr: true, enableSeconds: true });
         
+        const savedUser = localStorage.getItem('dataEntryUser');
+        if(savedUser) {
+            $('#user_name').val(savedUser);
+        }
+
         refreshTable(); // Load table on start
 
         $('#dataForm').on('submit', async function(e) {
             e.preventDefault();
+
+            if (!this.checkValidity()) {
+                this.reportValidity();
+                return;
+            }
+
             const btn = $('#submitBtn');
             const btnText = $('#btnText');
-            const btnSpinner = $('#btnSpinner');
-            btn.prop('disabled', true).text('Saving...');
-            btnSpinner.removeClass('d-none'); // Show the spinner
+
+            btn.prop('disabled', true);
+            btnText.text('Savings...');
 
             const payload = {
-                hid: $('#hid').val(), mls_name: $('#mls_name').val(),
-                prop_type: $('#prop_type').val(), status: $('#status').val(),
-                start_time: $('#start_time').val(), end_time: $('#end_time').val()
+                user_name: $('#user_name').val(),
+                hid: $('#hid').val(), 
+                mls_name: $('#mls_name').val(),
+                home_type: $('#home_type').val(),
+                listing_date: $('#listing_date').val(),
+                prop_type: $('#prop_type').val(), 
+                status: $('#status').val(),
+                start_time: $('#start_time').val(), 
+                end_time: $('#end_time').val()
             };
         try {
             const res = await fetch('/submit', {
@@ -144,19 +186,20 @@
             if (result.status === "success") {
                 $('#msg').html(`<div class="text-success fw-bold">✅ ${result.message}</div>`);
                 $('#dataForm')[0].reset();
+                $('#user_name').val(currentUser);
                 $('#mls_name').val(null).trigger('change');
+                
                 refreshTable(); // Refresh table immediately
             } else {
-                $('#msg').html(`<div class="text-danger fw-bold">❌ Error: ${result.message}</div>`)
+                $('#msg').html(`<div class="text-danger fw-bold">❌ ${result.message}</div>`)
             }
 
         } catch (err) {
             $('#msg').html(`<div class="text-danger fw-bold">❌ Connection Error</div>`);
         } finally {
-            // 2. Reset UI: Hide Spinner, Enable Button
+            // Button reset fix
         btn.prop('disabled', false);
         btnText.text('Submit Entry');
-        btnSpinner.addClass('d-none'); // Hide the spinner
         }
         });
     });

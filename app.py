@@ -52,6 +52,18 @@ def get_recent():
 def submit():
     try:
         data = request.json
+        hid = data.get('hid')
+        sheet = get_google_sheet()
+
+        #Duplicate HID Check
+        existing_hids = sheet.col_values(1)[1:]
+        if hid in existing_hids:
+            # return a bad request error for duplicate error message
+            return jsonify({
+                "status" : "error"
+                "message" : f"Duplicate Alert: HID {hid} has already been entered!"
+            }), 400
+
         # Time Calculation Logic
         fmt = "%H:%M:%S"
         start_dt = datetime.strptime(data.get('start_time'), fmt)
@@ -70,19 +82,20 @@ def submit():
 
         new_row = [
             data.get('hid'),
+            data.get('user_name'),
             data.get('mls_name'),
             data.get('prop_type'),
+            data.get('home_type'),
             data.get('status'),
             time_taken_string, # Combined string here
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         ]
 
-        sheet = get_google_sheet()
         sheet.append_row(new_row)
 
         return jsonify({
             "status": "success", 
-            "message": f"Saved! Duration: {time_taken_string}"
+            "message": f"Saved {hid}! Duration: {time_taken_string}"
         })
 
     except Exception as e:
@@ -102,3 +115,4 @@ if __name__ == '__main__':
     # option to edit previous entry in the bottom recent entries
     # add hometype field with options (Single Family Residence, Condo, Mobile, Manufactured)
     # add user name of who is entering the data, name should remain constant on the browser throughout the data entry session
+    # if time range is not entered and submitted, submit button stops functioning, user has to refresh
