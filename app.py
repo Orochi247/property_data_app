@@ -60,22 +60,28 @@ def submit():
         # 2. Time Math
         start_time = data.get('start_time')
         end_time = data.get('end_time')
-        start_dt = datetime.strptime(start_time, "%H:%M:%S")
-        end_dt = datetime.strptime(end_time, "%H:%M:%S")
-        
-        duration = end_dt - start_dt
-        total_seconds = int(duration.total_seconds())
-        if total_seconds < 0: total_seconds += 86400 
-            
-        hours = total_seconds // 3600
-        minutes = (total_seconds % 3600) // 60
-        time_taken_string = f"{hours} H {minutes} M"
+        time_taken_string = ""
 
-        # 3. Create the perfect 8-column row
+        if start_time and end_time:
+            try:
+                start_dt = datetime.strptime(start_time, "%H:%M:%S")
+                end_dt = datetime.strptime(end_time, "%H:%M:%S")
+                duration = end_dt - start_dt
+                total_seconds = int(duration.total_seconds())
+                if total_seconds < 0: total_seconds += 86400 
+                hours = total_seconds // 3600
+                minutes = (total_seconds % 3600) // 60
+                time_taken_string = f"{hours} H {minutes} M"
+
+            except:
+                time_taken_string = "Invalid Time"
+
+        #  9-column row
         new_row = [
             hid,
             data.get('user_name', ''),     
-            data.get('mls_name', ''),      
+            data.get('mls_name', ''),
+            data.get('prop_type'),      
             data.get('home_type', ''),     
             data.get('listing_date', ''),  
             data.get('status', ''),        
@@ -83,7 +89,7 @@ def submit():
             datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
         ]
 
-        # 4. Save it
+#saves the sheet
         sheet.append_row(new_row)
         return jsonify({"status": "success", "message": f"Saved {hid}!"})
 
@@ -92,7 +98,6 @@ def submit():
 
 @app.route('/update', methods=['POST'])
 def update_entry():
-    # Adding this so your "Edit" button doesn't crash the server later!
     try:
         data = request.json
         hid = data.get('hid')
@@ -105,28 +110,32 @@ def update_entry():
             return jsonify({"status": "error", "message": "HID not found!"}), 404
 
         existing_row = sheet.row_values(row_index)
-        while len(existing_row) < 8:
+        while len(existing_row) < 9:
             existing_row.append("")
 
         existing_row[1] = data.get('user_name')
         existing_row[2] = data.get('mls_name')
-        existing_row[3] = data.get('home_type')
-        existing_row[4] = data.get('listing_date')
-        existing_row[5] = data.get('status')
+        existing_row[3] = data.get('prop_type')
+        existing_row[4] = data.get('home_type')
+        existing_row[5] = data.get('listing_date')
+        existing_row[6] = data.get('status')
         
         start_time = data.get('start_time')
         end_time = data.get('end_time')
         if start_time and end_time:
-            start_dt = datetime.strptime(start_time, "%H:%M:%S")
-            end_dt = datetime.strptime(end_time, "%H:%M:%S")
-            duration = end_dt - start_dt
-            total_seconds = int(duration.total_seconds())
-            if total_seconds < 0: total_seconds += 86400 
-            hours = total_seconds // 3600
-            minutes = (total_seconds % 3600) // 60
-            existing_row[6] = f"{hours} H {minutes} M"
+            try:    
+                start_dt = datetime.strptime(start_time, "%H:%M:%S")
+                end_dt = datetime.strptime(end_time, "%H:%M:%S")
+                duration = end_dt - start_dt
+                total_seconds = int(duration.total_seconds())
+                if total_seconds < 0: total_seconds += 86400 
+                hours = total_seconds // 3600
+                minutes = (total_seconds % 3600) // 60
+                existing_row[7] = f"{hours} H {minutes} M"
+            except ValueError:
+                pass #this keeps the old time if its invalid
 
-        sheet.update(f'A{row_index}:H{row_index}', [existing_row[:8]])
+        sheet.update(f'A{row_index}:H{row_index}', [existing_row[:9]])
         return jsonify({"status": "success", "message": f"Updated {hid}!"})
 
     except Exception as e:
