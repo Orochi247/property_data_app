@@ -131,22 +131,26 @@
 
 <script>
     async function refreshTable() {
-        const res = await fetch('/get_recent');
-        const data = await res.json();
-        let html = '';
-        data.forEach(row => {
-            html += `<tr>
-                <td><strong>${row[0]}</strong></td> 
-            <td>${row[1]}</td> 
-            <td>${row[2]}</td> 
-            <td><span class="badge bg-info text-dark"">${row[3]}</span></td> 
-            <td>${row[4]}</td> 
-            <td>${row[5] === 'Found' ? '✅' : '❌'}</td> 
-            <td>${row[6]}</td> 
+        try {
+            const res = await fetch('/get_recent');
+            const data = await res.json();
+            let html = '';
+            data.forEach(row => {
+                const rowDataStr = encodeURIComponent(JSON.stringify(row));
+
+                const isFound = (row[5] === 'Found' || row[5] === 'Data Found');
+                
+                html += `<tr>
+                <td><strong>${row[0]}</strong></td> <td>${row[1]}</td> <td><span class="badge bg-info text-dark">${row[2]}</span></td> <td><span class="badge bg-secondary">${row[3] || '-'}</span></td> <td>${row[4] || '-'}</td> <td>${isFound ? '✅' : '❌'}</td> <td>${row[6] || '-'}</td> <td><small>${row[7] || '-'}</small></td> <td>
+                    <button type="button" class="btn btn-sm btn-outline-warning fw-bold" onclick="editRow('${rowDataStr}')">Edit</button>
+                </td>
             </tr>`;
-        });
+            });
         $('#entriesBody').html(html || '<tr><td colspan="7" class="text-center">No data found</td></tr>');
+    } catch(err) {
+        console.error("Failed to load table data:", err);
     }
+}
 
     $(document).ready(function() {
         $('.searchable-select').select2();
