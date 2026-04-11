@@ -102,15 +102,23 @@
                     <button class="btn btn-sm btn-outline-secondary" onclick="refreshTable()">🔄 Refresh</button>
                 </div>
                 <div class="table-responsive">
-                    <table class="table align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>HID</th><th>User</th><th>MLS</th><th>Type</th><th>Home Type</th><th>Duration</th><th>Status</th><th>Listing Date</th><th>Timestamp</th>
-                            </tr>
-                        </thead>
-                        <tbody id="entriesBody">
-                            </tbody>
-                    </table>
+                    <table class="table table-striped table-hover mb-0" id="entriesTable">
+    <thead class="table-dark">
+        <tr>
+            <th>HID</th>
+            <th>User</th>
+            <th>MLS Name</th>
+            <th>Home Type</th>
+            <th>Listing Date</th>
+            <th>Status</th>
+            <th>Time Taken</th>
+            <th>Timestamp</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="entriesBody">
+        </tbody>
+</table>
                 </div>
             </div>
         </div>
