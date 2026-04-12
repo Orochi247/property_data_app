@@ -24,11 +24,18 @@ cursor.execute("""
 
 print("Hashing passwords...")
 # 2. Scramble the passwords BEFORE sending them to the database
-test_secure_hash = generate_password_hash("admin")
+shreyan_secure_hash = generate_password_hash("REDACTED")
+abhishek_secure_hash = generate_password_hash("REDACTED")
+sneha_secure_hash = generate_password_hash("REDACTED")
+nikita_secure_hash = generate_password_hash("REDACTED")
 
 print("Saving users to database...")
 insert_query = "INSERT INTO users (username, password) VALUES (%s, %s)"
-cursor.execute(insert_query, ("Test", test_secure_hash))
+cursor.execute(insert_query, ("Shreyan", shreyan_secure_hash))
+cursor.execute(insert_query, ("Abhishek", abhishek_secure_hash))
+cursor.execute(insert_query, ("Sneha", sneha_secure_hash))
+cursor.execute(insert_query, ("Nikita", nikita_secure_hash))
+
 
 conn.commit()
 cursor.close()
