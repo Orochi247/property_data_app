@@ -135,7 +135,7 @@ def update_entry():
             except ValueError:
                 pass #this keeps the old time if its invalid
 
-        sheet.update(f'A{row_index}:H{row_index}', [existing_row[:9]])
+        sheet.update(f'A{row_index}:I{row_index}', [existing_row[:9]])
         return jsonify({"status": "success", "message": f"Updated {hid}!"})
 
     except Exception as e:
