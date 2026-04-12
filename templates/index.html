@@ -20,19 +20,27 @@
     </div>
     <div class="container py-3" style="max-width: 900px;">
         
-        <div class="top-nav">
-            <span class="text-muted fw-bold me-3">Agent: <span class="text-dark">{{ current_user }}</span></span>
-            <a href="/logout" class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3">Logout</a>
-        </div>
+     <div class="modern-card header-card d-flex align-items-center mb-4 p-3 px-4">
+            
+            <div class="header-brand flex-grow-1">
+                <h1 style="color: var(--houzeo-blue); font-weight: 800; font-size: 2.2rem; letter-spacing: -1px; margin-bottom: 0;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" style="margin-top: -6px;">
+                        <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3zm0 2.7l5 4.5V18h-2v-6H9v6H7v-7.8l5-4.5z"/>
+                    </svg>
+                    Houzeo<span style="color: #333; font-size: 1.2rem; vertical-align: middle;"> Autofill Tracker</span>
+                </h1>
+            </div>
 
-        <div class="text-center mb-4">
-            <h1 style="color: var(--houzeo-blue); font-weight: 800; font-size: 2.8rem; letter-spacing: -1px; margin-bottom: 0;">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" style="margin-top: -8px;">
-                    <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3zm0 2.7l5 4.5V18h-2v-6H9v6H7v-7.8l5-4.5z"/>
-                </svg>
-                Houzeo<span style="color: #333; font-size: 1.5rem; vertical-align: middle;"> Autofill Tracker</span>
-            </h1>
-        </div>
+            <div class="header-divider"></div>
+
+            <div class="header-user d-flex align-items-center justify-content-end" style="min-width: 250px;">
+                <span class="text-muted fw-bold me-3" style="font-size: 0.95rem;">
+                    Agent: <span class="text-dark">{{ current_user }}</span>
+                </span>
+                <a href="/logout" class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3 py-2">Logout</a>
+            </div>
+            
+        </div>   
 
         <div id="msg" class="mb-4 text-center"></div>
 
@@ -69,7 +77,10 @@
                         <select class="form-select" id="prop_type" required>
                             <option value="" disabled selected>Select...</option>
                             <option value="Residential">Residential</option>
-                            <option value="Commercial">Commercial</option>
+                            <option value="Multi Family">Multi Family</option>
+                            <option value="Condominium">Condominium</option>
+                            <option value="Town House">Town House</option>
+                            <option value="Mobile">Mobile</option>
                             <option value="Land">Land</option>
                         </select>
                     </div>
@@ -120,14 +131,15 @@
         </div>
 
         <div class="modern-card p-0 overflow-hidden">
-            <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+            <div class="d-flex flex-wrap justify-content-between align-items-center p-3 p-md-4 border-bottom gap-2">
                 <h5 class="fw-bold mb-0" style="color: var(--houzeo-blue);">Recent Submissions</h5>
-                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold rounded-pill px-3" onclick="refreshTable()">
+                
+                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold rounded-pill px-3 text-nowrap" onclick="refreshTable()">
                     🔄 Refresh Data
                 </button>
             </div>
             <div class="table-responsive">
-                <table class="table table-custom table-hover mb-0" id="entriesTable">
+                <table class="table table-custom table-hover mb-0 w-100" id="entriesTable">
                     <thead>
                         <tr>
                             <th>HID</th>
@@ -135,7 +147,9 @@
                             <th>MLS / Property Details</th>
                             <th>Status</th>
                             <th>Time Log</th>
-                            <th class="text-end">Action</th>
+                            <th class="text-end" style="vertical-align: middle;">
+    <div style="padding-right: 2.8rem; width: 100%; display: block;">ACTION</div>
+</th>
                         </tr>
                     </thead>
                     <tbody id="entriesBody">
@@ -165,45 +179,84 @@
                     const statusText = isFound ? 'Found' : 'Not Found';
                     
                     html += `<tr>
-                        <td><span class="fw-bold">${row[0]}</span></td>
-                        <td>${row[1]}</td>
-                        <td>
-                            <div class="fw-bold text-dark">${row[2]}</div>
-                            <div class="mt-1">
-                                <span class="type-pill">${row[3] || '-'}</span> 
-                                <span class="type-pill">${row[4] || '-'}</span>
-                            </div>
-                        </td>
-                        <td><span class="status-badge ${statusClass}">● ${statusText}</span></td>
-                        <td>
-                            <div class="fw-bold text-dark">${row[7] || '-'}</div>
-                            <small class="text-muted">${row[5] || '-'}</small>
-                        </td>
-                        <td class="text-end">
-                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold edit-btn" data-row="${rowDataStr}">Edit</button>
-                        </td>
-                    </tr>`;
+        <td data-label="HID"><span class="fw-bold">${row[0]}</span></td>
+        <td data-label="AGENT">${row[1]}</td>
+        <td data-label="PROPERTY DETAILS">
+            <div class="d-flex flex-column align-items-end align-items-md-start text-end text-md-start">
+                <div class="fw-bold text-dark text-wrap">${row[2]}</div>
+                <div class="mt-1 d-flex flex-wrap justify-content-end justify-content-md-start gap-1">
+                    <span class="type-pill">${row[3] || '-'}</span> 
+                    <span class="type-pill">${row[4] || '-'}</span>
+                </div>
+            </div>
+        </td>
+        <td data-label="STATUS">
+            <span class="status-badge ${row[6] === 'Found' ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}">
+                ${row[6]}
+            </span>
+        </td>
+        <td data-label="TIME LOG">
+            <div class="fw-bold text-dark">${row[7] || '0H 0M'}</div>
+            <div class="text-muted small">${row[5] || ''}</div>
+        </td>
+        <td class="text-end" data-label="ACTION">
+            <div class="action-container" id="actions-${row[0]}">
+                <div class="action-group">
+                    <button type="button" class="btn btn-action btn-edit-mode edit-btn" data-row="${rowDataStr}">Edit</button>
+                    <button type="button" class="btn btn-action btn-delete-mode" onclick="deleteEntry('${row[0]}')">Delete</button>
+                </div>
+            </div>
+        </td>
+    </tr>`;
                 });
                 $('#entriesBody').html(html || '<tr><td colspan="6" class="text-center py-4 text-muted">No data found</td></tr>');
             } catch (err) {
                 console.error("Table Load Error:", err);
             }
         }
+function cancelEdit() {
+    isEditMode = false;
+    $('#dataForm')[0].reset();
+    $('#mls_name').val(null).trigger('change');
+    $('#msg').empty(); //hide the top editing message
+    $('#hid').prop('readonly', false).removeClass('bg-light');
+    
+    
 
+    // Reset Submit Button to Original Blue
+    $('#submitBtn').removeClass('btn-warning').addClass('btn-primary');
+    $('#btnText').text('Save Entry');
+    
+    // Refresh table to restore Edit/Delete buttons
+    refreshTable();
+}
+            // --- 3. The Delete Function ---
+async function deleteEntry(hid) {
+    if (confirm(`Are you sure you want to delete HID: ${hid} from the Database and Google Sheet?`)) {
+        const response = await fetch(`/delete/${hid}`, { method: 'DELETE' });
+        const result = await response.json();
+        if (result.status === 'success') {
+            refreshTable();
+        } else {
+            alert("Error deleting: " + result.message);
+        }
+    }
+}
         $(document).ready(function() {
             // Apply Select2 and Flatpickr
             $('.searchable-select').select2({ width: '100%' });
             flatpickr(".time-picker", { enableTime: true, noCalendar: true, dateFormat: "H:i:S", time_24hr: true, enableSeconds: true });
             
             refreshTable();
-
             // Edit Logic
             $('#entriesBody').on('click', '.edit-btn', function() {
                 const rowDataStr = $(this).attr('data-row');
                 const row = JSON.parse(decodeURIComponent(rowDataStr));
+                const hid = row[0];
+
+                
                 
                 $('#hid').val(row[0]).prop('readonly', true); 
-                // We no longer populate the username dropdown because it doesn't exist!
                 $('#mls_name').val(row[2]).trigger('change'); 
                 $('#prop_type').val(row[3]); 
                 $('#home_type').val(row[4]);
@@ -219,12 +272,28 @@
                 $('#end_time').val('').removeAttr('required');
                 
                 isEditMode = true;
-                $('#submitBtn').css({'background-color': '#f59e0b', 'border-color': '#f59e0b'}); // Warning yellow
+
+                $('#submitBtn').removeClass('btn-primary').addClass('btn-warning');
                 $('#btnText').text('Update Entry');
-                $('#msg').html(`<div class="alert alert-warning fw-bold border-0 shadow-sm" style="background-color: #fef3c7; color: #92400e;">✎ Editing Record HID: ${row[0]}</div>`);
-                
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                $('#msg').html(`
+    <div class="container mt-3 mb-1">
+        <div class="alert alert-warning fw-bold border-0 shadow-sm d-flex align-items-center justify-content-center py-3" 
+             style="background-color: #fef3c7; color: #92400e; border-radius: 12px;">
+            <span class="me-2">✎</span> Editing Record HID: ${row[0]}
+        </div>
+    </div>
+`);
+window.scrollTo({
+        top: 0,
+        behavior: 'smooth' 
+    });
+                $(`#actions-${hid}`).html(`
+        <button class="btn btn-cancel-pill rounded-pill fw-bold" onclick="cancelEdit()">
+            ✕ Cancel
+        </button>
+    `);
             });
+
 
             // Submit Logic
             $('#dataForm').on('submit', async function(e) {
@@ -260,6 +329,9 @@
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(payload)
                     });
+                    cancelEdit();
+                    $('#msg').html('<div class="alert alert-success py-2">✓ Entry Updated!</div>');
+                    setTimeout(() => $('#msg').empty(), 3000);
                     
                     if (!res.ok) {
                         const errData = await res.json();

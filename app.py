@@ -1,6 +1,8 @@
+import threading
 import os
 import json
 import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 import psycopg2
 from psycopg2.extras import RealDictCursor #returns output in a dictionary format
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
@@ -11,6 +13,12 @@ from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
 
 load_dotenv()
+
+def get_gspread_client():
+    # Path to your credentials file on your laptop
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds = ServiceAccountCredentials.from_json_keyfile_name('google_creds.json', scope)
+    return gspread.authorize(creds)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "fallback-secret-for-local-testing")
@@ -110,6 +118,7 @@ def submit():
     try:
         data = request.json
         hid = data.get('hid')
+        current_agent = session.get('user', 'Unknown Agent')
         
         sheet = get_google_sheet()
 
@@ -140,7 +149,7 @@ def submit():
         #  9-column row
         new_row = [
             hid,
-            data.get('user_name', ''),     
+            current_agent,     
             data.get('mls_name', ''),
             data.get('prop_type'),      
             data.get('home_type', ''),     
@@ -202,6 +211,30 @@ def update_entry():
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
+    
+@app.route('/delete/<hid>', methods=['DELETE'])
+@login_required
+def delete_entry(hid):
+    try:
+        # 1. Delete from Google Sheets
+        client = get_gspread_client()
+        sheet = client.open(os.getenv('GOOGLE_SHEET_NAME')).worksheet(os.getenv('GOOGLE_TAB_NAME'))
+        cell = sheet.find(str(hid))
+        if cell:
+            sheet.delete_rows(cell.row)
+        
+        # 2. Delete from SQL
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM tracker_data WHERE hid = %s", (hid,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # host='0.0.0.0' tells Flask to broadcast to your whole Wi-Fi network
+    app.run(host='0.0.0.0', port=5000, debug=True)

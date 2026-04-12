@@ -197,15 +197,48 @@ body {
 }
 
 .status-badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
+    padding: 6px 14px;
+    border-radius: 50px; /* Perfect pill shape */
+    font-size: 0.75rem;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 90px;
+    white-space: nowrap;
 }
 
-.bg-found { background-color: #dcfce7; color: #166534; }
-.bg-not-found { background-color: #fee2e2; color: #991b1b; }
-.type-pill { background-color: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
+/* Found Style (Green) */
+.bg-success-light {
+    background-color: #dcfce7 !important;
+    color: #166534 !important;
+    border: 1px solid #bbf7d0;
+}
+
+/* Not Found Style (Red) */
+.bg-danger-light {
+    background-color: #fee2e2 !important;
+    color: #991b1b !important;
+    border: 1px solid #fecaca;
+}
+
+/* Adds the little dot before the text for that "Live" feel */
+.status-badge::before {
+    content: '●';
+    margin-right: 6px;
+    font-size: 8px;
+}
+.type-pill { background-color: #f1f5f9; 
+    color: #475569; 
+    padding: 4px 10px; 
+    border-radius: 6px; 
+    font-size: 0.8rem; 
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 4px; 
+}
 
 /* --- LOGIN PAGE SPECIFIC --- */
 .login-wrapper {
@@ -222,4 +255,244 @@ body {
     padding: 3rem 2rem; 
     width: 100%; 
     max-width: 400px;
+}
+
+.header-card {
+    /* Reuses your modern-card styling but overrides the padding for a sleeker horizontal look */
+    padding: 1.2rem 2rem !important; 
+}
+
+.header-divider {
+    width: 2px;
+    height: 45px;
+    background-color: #e2e8f0; /* Soft gray line */
+    margin: 0 2rem;            /* Breathing room on both sides of the line */
+    border-radius: 2px;
+}
+
+/* Make it stack neatly on small mobile screens */
+@media (max-width: 768px) {
+    .header-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    .header-divider {
+        width: 80%;
+        height: 2px;
+        margin: 1rem 0;
+    }
+    .header-user {
+        justify-content: center !important;
+    }
+}
+
+/* --- MOBILE TABLE-TO-CARD CONVERSION --- */
+@media (max-width: 768px) {
+    /* 1. Force table elements to block level so they stack */
+    #entriesTable, 
+    #entriesTable thead, 
+    #entriesTable tbody, 
+    #entriesTable th, 
+    #entriesTable td, 
+    #entriesTable tr {
+        display: block;
+    }
+
+    /* 2. Hide the main table headers (Accessibility safe) */
+    #entriesTable thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    /* 3. Style each row to look like a floating card */
+    #entriesTable tr {
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        padding: 1.2rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+    }
+
+    /* 4. Style the individual data cells */
+    #entriesTable td {
+        border: none;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 0.8rem 0;
+        display: flex;
+        justify-content: space-between; /* Pushes label left, data right */
+        align-items: center;
+        text-align: right; /* Ensures data is aligned right */
+    }
+
+    /* Remove bottom border from the last item (the button) */
+    #entriesTable td:last-child {
+        border-bottom: none;
+        padding-top: 1.2rem;
+        padding-bottom: 0;
+        display: block; 
+    }
+
+    /* 5. Inject the data-labels we added in JavaScript */
+    #entriesTable td::before {
+        content: attr(data-label);
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left;
+        margin-right: 15px;
+        flex-shrink: 0; /* Prevents long labels from getting squished */
+    }
+
+    /* We don't need a label for the action button */
+    #entriesTable td:last-child::before {
+        display: none;
+    }
+
+    /* Ensure pills and text align correctly on the right */
+    #entriesTable td > div {
+        text-align: right;
+    }
+}
+
+/* --- MOBILE SCROLL FIX --- */
+html, body {
+    width: 100vw;
+    max-width: 100%;
+    overflow-x: hidden; /* Strictly prevents the entire app from sliding left/right */
+}
+
+/* Ensure only the table handles the swiping */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Adds buttery-smooth momentum scrolling on iPhones/Androids */
+}
+
+/* Optional: Slight padding reduction on mobile so the card fits the screen better */
+@media (max-width: 768px) {
+    .modern-card {
+        padding: 1.5rem 1rem !important;
+    }
+    .table-custom td {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        text-align: right !important;
+        padding: 0.8rem 1rem !important;
+    }
+
+    /* This part ensures the label (like "HID") stays on the left */
+    .table-custom td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #64748b;
+        font-size: 0.75rem;
+        margin-right: 1rem;
+        text-align: left;
+    }
+}
+
+/* --- DESKTOP TABLE ALIGNMENT FIX --- */
+#entriesTable {
+    width: 100% !important;
+    min-width: 100%;
+}
+
+/* Match the table's side padding to the header's padding (p-4 = 1.5rem) */
+.table-custom th:first-child, 
+.table-custom td:first-child {
+    padding-left: 1rem !important;
+}
+
+.table-custom th:last-child, 
+.table-custom td:last-child {
+    padding-right: 1.5rem !important;
+}
+
+/* --- RESPONSIVE BORDER LOGIC --- */
+
+/* 1. Default (Mobile First): Keep borders on the cells so they show between stacked items */
+.table-custom tbody td {
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+/* 2. PC Only (Screens wider than 768px) */
+@media (min-width: 768px) {
+    /* Remove the cell borders */
+    .table-custom tbody td {
+        border-bottom: none !important;
+    }
+    
+    /* Draw the solid line under the whole row */
+    .table-custom tbody tr {
+        border-bottom: 1px solid #e2e8f0 !important;
+        display: table-row; /* Ensures the row behaves like a row */
+    }
+
+    /* Keep the very last line of the table clean */
+    .table-custom tbody tr:last-child {
+        border-bottom: none !important;
+    }
+}
+
+/* --- ACTION BUTTONS --- */
+.action-container {
+    min-width: 120px; /* Prevents jumping when switching buttons */
+}
+
+.action-group {
+    display: inline-flex;
+    border: 1px solid #e2e8f0;
+    border-radius: 50px;
+    overflow: hidden;
+    background: white;
+}
+
+.btn-action {
+    border: none !important;
+    padding: 6px 16px !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    transition: all 0.2s ease;
+}
+
+/* Edit Side */
+.btn-edit-mode {
+    color: var(--houzeo-blue) !important;
+    border-right: 1px solid #e2e8f0 !important;
+}
+.btn-edit-mode:hover { background: #f0f7ff !important; }
+
+/* Delete Side */
+.btn-delete-mode {
+    color: #ef4444 !important;
+}
+.btn-delete-mode:hover { background: #fef2f2 !important; }
+
+/* Cancel Button (Full Pill) */
+.btn-cancel-pill {
+    background-color: #475569 !important; /* Slate Gray */
+    color: white !important;
+    border: none !important;
+    padding: 6px 18px !important;
+    font-size: 0.8rem !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile Tweak: Ensure the Action label and buttons align */
+@media (max-width: 768px) {
+    .action-container {
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+    }
+}
+/* Update your existing time-log styles or add this */
+[data-label="TIME LOG"] div {
+    white-space: nowrap !important;
 }
