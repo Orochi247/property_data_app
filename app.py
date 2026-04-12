@@ -1,14 +1,23 @@
 import os
 import json
 import gspread
-from flask import Flask, render_template, request, jsonify
+import psycopg2
+from psycopg2.extras import RealDictCursor #returns output in a dictionary format
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from functools import wraps
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 from dotenv import load_dotenv
+from werkzeug.security import check_password_hash
 
 load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "fallback-secret-for-local-testing")
+
+def get_db_connection():
+    conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+    return conn
 
 # --- CONFIGURATION ---
 SHEET_NAME = os.environ.get("GOOGLE_SHEET_NAME")
@@ -21,7 +30,52 @@ def get_google_sheet():
     return client.open(SHEET_NAME).worksheet(TAB_NAME)
 
 # --- ROUTES ---
+#log in authentication
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# --- LOGIN & LOGOUT ROUTES ---
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        form_username = request.form.get('username')
+        form_password = request.form.get('password')
+        
+        try:
+            # 1. Open Database Connection
+            conn = get_db_connection()
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+            # 2. Search for user
+            sql_query = "SELECT * FROM users WHERE username = %s"
+            cursor.execute(sql_query, (form_username,))
+            user = cursor.fetchone()
+            
+            # Close connection
+            cursor.close()
+            conn.close()
+
+            # 3. Verify Credentials with Password Hashing
+            if user and check_password_hash(user['password'], form_password):
+                session['user'] = user['username']
+                return redirect(url_for('index'))
+            else:
+                return render_template('login.html', error="Invalid User ID or Password.")
+        except Exception as e:
+            return render_template('login.html', error="Database connection error. Please try again.")
+            
+    return render_template('login.html')
+
+
+
+# --- PROTECTED APP ROUTES ---
 @app.route('/')
+@login_required
 def index():
     try:
         with open('mls_data.json', 'r') as f:
@@ -30,9 +84,12 @@ def index():
     except Exception as e:
         mls_list = []
         print(f"Error loading JSON: {e}")
-    return render_template('index.html', mls_list=sorted(mls_list))
+        
+    return render_template('index.html', mls_list=sorted(mls_list), current_user=session['user'])
+
 
 @app.route('/get_recent')
+@login_required
 def get_recent():
     try:
         sheet = get_google_sheet()
@@ -45,6 +102,7 @@ def get_recent():
         return jsonify([])
 
 @app.route('/submit', methods=['POST'])
+@login_required
 def submit():
     try:
         data = request.json
@@ -97,6 +155,7 @@ def submit():
         return jsonify({"status": "error", "message": str(e)}), 400
 
 @app.route('/update', methods=['POST'])
+@login_required
 def update_entry():
     try:
         data = request.json

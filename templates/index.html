@@ -3,122 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autofill Data Tracker</title>
+    <title>Houzeo Data Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="bg-light p-4">
-    <div class="container max-w-4xl mx-auto">
-        <h2 class="mb-4 text-center fw-bold">Autofill Data Tracker</h2>
-
-        <div class="card shadow-sm mb-5">
-            <div class="card-body">
-                <form id="dataForm">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="user_name" class="form-label fw-bold">Data Entry User</label>
-                            <select class="form-select" id="user_name" required>
-                                <option value="" disabled selected>Select your name...</option>
-                                <option value="Abhishek">Abhishek</option>
-                                <option value="Shreyan">Shreyan</option>
-                                <option value="Sneha">Sneha</option>
-                                <option value="Nikita">Nikita</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="hid" class="form-label fw-bold">HID</label>
-                            <input type="text" class="form-control" id="hid" placeholder="Enter HID..." required>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="mls_name" class="form-label fw-bold">MLS Name</label>
-                        <select class="form-select searchable-select" id="mls_name" required>
-                            <option value="" disabled selected>Search MLS...</option>
-                            {% for mls in mls_list %}
-                                <option value="{{ mls }}">{{ mls }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="prop_type" class="form-label fw-bold">Property Type</label>
-                            <select class="form-select" id="prop_type" required>
-                                <option value="" disabled selected>Select...</option>
-                                <option value="Residential">Residential</option>
-                                <option value="Commercial">Commercial</option>
-                                <option value="Land">Land</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="home_type" class="form-label fw-bold">Home Type</label>
-                            <select class="form-select" id="home_type" required>
-                                <option value="" disabled selected>Select...</option>
-                                <option value="Single Family Residence">Single Family Residence</option>
-                                <option value="Condo">Condo</option>
-                                <option value="Mobile">Mobile</option>
-                                <option value="Manufactured">Manufactured</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="listing_date" class="form-label fw-bold">Listing Date</label>
-                            <input type="date" class="form-control" id="listing_date" required>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="status" class="form-label fw-bold">Status</label>
-                            <select class="form-select" id="status" required>
-                                <option value="" disabled selected>Select...</option>
-                                <option value="Found">Data Found</option>
-                                <option value="Not Found">Not Found</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="start_time" class="form-label fw-bold">Start Time</label>
-                            <input type="text" class="form-control time-picker" id="start_time" placeholder="HH:MM:SS" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="end_time" class="form-label fw-bold">End Time</label>
-                            <input type="text" class="form-control time-picker" id="end_time" placeholder="HH:MM:SS" required>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mt-3" id="submitBtn">
-                        <span id="btnText">Submit Entry</span>
-                    </button>
-                    
-                </form>
-            </div>
-            <div id="msg" class="mb-3 text-center"></div>
+<body>
+    <div class="container py-3" style="max-width: 900px;">
+        
+        <div class="top-nav">
+            <span class="text-muted fw-bold me-3">Agent: <span class="text-dark">{{ current_user }}</span></span>
+            <a href="/logout" class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3">Logout</a>
         </div>
 
-        <div class="card shadow-sm">
-            <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
-                <span>Recent Submissions</span>
-                <button type="button" class="btn btn-sm btn-light fw-bold" onclick="refreshTable()">
-                    🔄 Refresh
+        <div class="text-center mb-4">
+            <h1 style="color: var(--houzeo-blue); font-weight: 800; font-size: 2.8rem; letter-spacing: -1px; margin-bottom: 0;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" style="margin-top: -8px;">
+                    <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3zm0 2.7l5 4.5V18h-2v-6H9v6H7v-7.8l5-4.5z"/>
+                </svg>
+                Houzeo<span style="color: #333; font-size: 1.5rem; vertical-align: middle;"> Data Portal</span>
+            </h1>
+        </div>
+
+        <div id="msg" class="mb-4 text-center"></div>
+
+        <div class="modern-card">
+            <form id="dataForm">
+                
+                <div class="step-header">
+                    <div class="step-badge">1</div>
+                    <h3 class="step-title">Record Identification</h3>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label for="hid" class="form-label">Property HID</label>
+                        <input type="text" class="form-control" id="hid" placeholder="Enter Property HID..." required>
+                    </div>
+                </div>
+
+                <div class="step-header mt-5">
+                    <div class="step-badge">2</div>
+                    <h3 class="step-title">Property Specifications</h3>
+                </div>
+                <div class="mb-4">
+                    <label for="mls_name" class="form-label">MLS Name</label>
+                    <select class="form-select searchable-select" id="mls_name" required>
+                        <option value="" disabled selected>Search MLS Database...</option>
+                        {% for mls in mls_list %}
+                            <option value="{{ mls }}">{{ mls }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label for="prop_type" class="form-label">Property Type</label>
+                        <select class="form-select" id="prop_type" required>
+                            <option value="" disabled selected>Select...</option>
+                            <option value="Residential">Residential</option>
+                            <option value="Commercial">Commercial</option>
+                            <option value="Land">Land</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label for="home_type" class="form-label">Home Type</label>
+                        <select class="form-select" id="home_type" required>
+                            <option value="" disabled selected>Select...</option>
+                            <option value="Single Family Residence">Single Family Residence</option>
+                            <option value="Condo">Condo</option>
+                            <option value="Mobile">Mobile</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="listing_date" class="form-label">Listing Date</label>
+                        <input type="date" class="form-control" id="listing_date" required>
+                    </div>
+                </div>
+
+                <div class="step-header mt-5">
+                    <div class="step-badge">3</div>
+                    <h3 class="step-title">Status & Tracking</h3>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label for="status" class="form-label">Record Status</label>
+                        <select class="form-select" id="status" required>
+                            <option value="" disabled selected>Select status...</option>
+                            <option value="Found">Data Found</option>
+                            <option value="Not Found">Not Found</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label for="start_time" class="form-label">Start Time</label>
+                        <input type="text" class="form-control time-picker" id="start_time" placeholder="HH:MM:SS" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="end_time" class="form-label">End Time</label>
+                        <input type="text" class="form-control time-picker" id="end_time" placeholder="HH:MM:SS" required>
+                    </div>
+                </div>
+
+                <div class="mt-5">
+                    <button type="submit" class="btn btn-brand w-100" id="submitBtn">
+                        <span id="btnText">Save Entry</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="modern-card p-0 overflow-hidden">
+            <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+                <h5 class="fw-bold mb-0" style="color: var(--houzeo-blue);">Recent Submissions</h5>
+                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold rounded-pill px-3" onclick="refreshTable()">
+                    🔄 Refresh Data
                 </button>
             </div>
-            <div class="card-body p-0 table-responsive">
-                <table class="table table-striped table-hover mb-0" id="entriesTable">
-                    <thead class="table-dark">
+            <div class="table-responsive">
+                <table class="table table-custom table-hover mb-0" id="entriesTable">
+                    <thead>
                         <tr>
                             <th>HID</th>
-                            <th>User</th>
-                            <th>MLS Name</th>
-                            <th>Prop Type</th>
-                            <th>Home Type</th>
-                            <th>Listing Date</th>
+                            <th>Agent</th>
+                            <th>MLS / Property Details</th>
                             <th>Status</th>
-                            <th>Time</th>
-                            <th>Action</th>
+                            <th>Time Log</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="entriesBody"></tbody>
+                    <tbody id="entriesBody">
+                        </tbody>
                 </table>
             </div>
         </div>
@@ -138,53 +153,56 @@
                 let html = '';
                 
                 data.forEach(row => {
-                    // Safe Data Binding for Edit Button
                     const rowDataStr = encodeURIComponent(JSON.stringify(row));
                     const isFound = (row[6] === 'Found' || row[6] === 'Data Found');
+                    const statusClass = isFound ? 'bg-found' : 'bg-not-found';
+                    const statusText = isFound ? 'Found' : 'Not Found';
                     
                     html += `<tr>
-                        <td><strong>${row[0]}</strong></td>
+                        <td><span class="fw-bold">${row[0]}</span></td>
                         <td>${row[1]}</td>
-                        <td><span class="badge bg-info text-dark">${row[2]}</span></td>
-                        <td><span class="badge bg-secondary">${row[3] || '-'}</span></td>
-                        <td><span class="badge bg-secondary">${row[4] || '-'}</span></td>
-                        <td>${row[5] || '-'}</td>
-                        <td>${isFound ? '✅' : '❌'}</td>
-                        <td>${row[7] || '-'}</td>
                         <td>
-                            <button type="button" class="btn btn-sm btn-outline-warning fw-bold edit-btn" data-row="${rowDataStr}">Edit</button>
+                            <div class="fw-bold text-dark">${row[2]}</div>
+                            <div class="mt-1">
+                                <span class="type-pill">${row[3] || '-'}</span> 
+                                <span class="type-pill">${row[4] || '-'}</span>
+                            </div>
+                        </td>
+                        <td><span class="status-badge ${statusClass}">● ${statusText}</span></td>
+                        <td>
+                            <div class="fw-bold text-dark">${row[7] || '-'}</div>
+                            <small class="text-muted">${row[5] || '-'}</small>
+                        </td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold edit-btn" data-row="${rowDataStr}">Edit</button>
                         </td>
                     </tr>`;
                 });
-                $('#entriesBody').html(html || '<tr><td colspan="9" class="text-center">No data found</td></tr>');
+                $('#entriesBody').html(html || '<tr><td colspan="6" class="text-center py-4 text-muted">No data found</td></tr>');
             } catch (err) {
                 console.error("Table Load Error:", err);
             }
         }
 
         $(document).ready(function() {
-            $('.searchable-select').select2();
+            // Apply Select2 and Flatpickr
+            $('.searchable-select').select2({ width: '100%' });
             flatpickr(".time-picker", { enableTime: true, noCalendar: true, dateFormat: "H:i:S", time_24hr: true, enableSeconds: true });
             
-            const savedUser = localStorage.getItem('dataEntryUser');
-            if (savedUser) $('#user_name').val(savedUser);
-            $('#user_name').on('change', function() { localStorage.setItem('dataEntryUser', $(this).val()); });
-
             refreshTable();
 
-            // NEW BULLETPROOF EDIT BUTTON LOGIC
+            // Edit Logic
             $('#entriesBody').on('click', '.edit-btn', function() {
                 const rowDataStr = $(this).attr('data-row');
                 const row = JSON.parse(decodeURIComponent(rowDataStr));
                 
                 $('#hid').val(row[0]).prop('readonly', true); 
-                $('#user_name').val(row[1]);
+                // We no longer populate the username dropdown because it doesn't exist!
                 $('#mls_name').val(row[2]).trigger('change'); 
                 $('#prop_type').val(row[3]); 
                 $('#home_type').val(row[4]);
                 $('#listing_date').val(row[5]);
                 
-                // Handle different status names gracefully
                 if (row[6] === 'Found' || row[6] === 'Data Found') {
                     $('#status').val('Found');
                 } else {
@@ -195,13 +213,14 @@
                 $('#end_time').val('').removeAttr('required');
                 
                 isEditMode = true;
-                $('#submitBtn').removeClass('btn-primary').addClass('btn-warning');
+                $('#submitBtn').css({'background-color': '#f59e0b', 'border-color': '#f59e0b'}); // Warning yellow
                 $('#btnText').text('Update Entry');
-                $('#msg').html(`<div class="alert alert-warning fw-bold">Editing HID: ${row[0]}</div>`);
+                $('#msg').html(`<div class="alert alert-warning fw-bold border-0 shadow-sm" style="background-color: #fef3c7; color: #92400e;">✎ Editing Record HID: ${row[0]}</div>`);
                 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
+            // Submit Logic
             $('#dataForm').on('submit', async function(e) {
                 e.preventDefault();
 
@@ -213,10 +232,10 @@
                 const btn = $('#submitBtn');
                 const btnText = $('#btnText');
                 btn.prop('disabled', true);
-                btnText.text(isEditMode ? 'Updating...' : 'Saving...'); 
+                btnText.text(isEditMode ? 'Updating Server...' : 'Saving Record...'); 
 
+                // Notice: 'user_name' is no longer included in the payload. The server handles it safely now!
                 const payload = {
-                    user_name: $('#user_name').val(),
                     hid: $('#hid').val(), 
                     mls_name: $('#mls_name').val(),
                     prop_type: $('#prop_type').val(),
@@ -236,7 +255,6 @@
                         body: JSON.stringify(payload)
                     });
                     
-                    // ADVANCED ERROR TRACING
                     if (!res.ok) {
                         const errData = await res.json();
                         throw new Error(errData.message || `Server returned ${res.status}`);
@@ -245,11 +263,9 @@
                     const result = await res.json();
 
                     if (result.status === "success") {
-                        $('#msg').html(`<div class="text-success fw-bold mb-3">✅ ${result.message}</div>`);
+                        $('#msg').html(`<div class="alert alert-success fw-bold border-0 shadow-sm" style="background-color: #dcfce7; color: #166534;">✅ ${result.message}</div>`);
                         
-                        const currentUser = $('#user_name').val();
                         $('#dataForm')[0].reset();
-                        $('#user_name').val(currentUser);
                         $('#mls_name').val(null).trigger('change');
                         
                         if (isEditMode) {
@@ -257,17 +273,19 @@
                             $('#hid').prop('readonly', false); 
                             $('#start_time').attr('required', true); 
                             $('#end_time').attr('required', true);
-                            btn.removeClass('btn-warning').addClass('btn-primary');
+                            $('#submitBtn').css({'background-color': '', 'border-color': ''}); 
                         }
                         
                         refreshTable(); 
                     }
                 } catch (err) {
-                    // This will now print the EXACT error instead of a generic message
-                    $('#msg').html(`<div class="text-danger fw-bold mb-3">❌ Error: ${err.message}</div>`);
+                    $('#msg').html(`<div class="alert alert-danger fw-bold border-0 shadow-sm" style="background-color: #fee2e2; color: #991b1b;">❌ Error: ${err.message}</div>`);
                 } finally {
                     btn.prop('disabled', false);
-                    btnText.text(isEditMode ? 'Update Entry' : 'Submit Entry'); 
+                    btnText.text(isEditMode ? 'Update Entry' : 'Save Entry'); 
+                    if(!isEditMode && !btn.prop('disabled')){
+                        setTimeout(() => { $('#msg').empty(); }, 5000);
+                    }
                 }
             });
         });

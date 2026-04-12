@@ -1,0 +1,160 @@
+/* --- HOUZEO BRAND THEME --- */
+:root {
+    --houzeo-blue: #0066cc; 
+    --houzeo-blue-hover: #0052a3;
+    --bg-light: #f4f7fb;
+    --text-dark: #1e293b;
+}
+
+body {
+    background-color: var(--bg-light);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-dark);
+}
+
+/* --- SHARED COMPONENTS --- */
+.modern-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.btn-brand {
+    background-color: var(--houzeo-blue);
+    color: white;
+    border-radius: 8px;
+    padding: 0.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-brand:hover {
+    background-color: var(--houzeo-blue-hover);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Form Inputs */
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1.5px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--houzeo-blue);
+    box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+}
+
+/* --- DASHBOARD SPECIFIC --- */
+.top-nav {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 1rem 0;
+    margin-bottom: -1rem;
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.step-badge {
+    background-color: var(--houzeo-blue);
+    color: white;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-right: 12px;
+}
+
+.step-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-dark);
+}
+
+/* Select2 Overrides */
+.select2-container--default .select2-selection--single {
+    height: auto;
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    border: 1.5px solid #e2e8f0;
+    font-weight: 500;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    top: 50%;
+    transform: translateY(-50%);
+    right: 10px;
+}
+
+/* Table Styling */
+.table-custom th {
+    background-color: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 1rem;
+}
+
+.table-custom td {
+    vertical-align: middle;
+    padding: 1rem;
+    color: #334155;
+    font-weight: 500;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.bg-found { background-color: #dcfce7; color: #166534; }
+.bg-not-found { background-color: #fee2e2; color: #991b1b; }
+.type-pill { background-color: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
+
+/* --- LOGIN PAGE SPECIFIC --- */
+.login-wrapper {
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    height: 100vh;
+}
+
+.login-card {
+    background: #ffffff; 
+    border-radius: 16px; 
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); 
+    padding: 3rem 2rem; 
+    width: 100%; 
+    max-width: 400px;
+}
