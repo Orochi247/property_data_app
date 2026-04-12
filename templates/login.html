@@ -37,10 +37,34 @@
             </div>
             <div class="mb-4">
                 <label class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Password</label>
-                <input type="password" name="password" class="form-control" required>
+                
+                <div class="position-relative">
+                    <input type="password" name="password" id="passwordInput" class="form-control" style="padding-right: 2.5rem;" required>
+                    
+                    <button type="button" id="togglePassword" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted" style="padding: 0.5rem 0.8rem; border: none; background: transparent; outline: none;">
+                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <button type="submit" class="btn btn-brand">Sign In</button>
         </form>
+        <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const passwordInput = document.querySelector('#passwordInput');
+        const eyeIcon = document.querySelector('#eyeIcon');
+
+        togglePassword.addEventListener('click', function () {
+            // Toggle the type attribute between 'password' and 'text'
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Dim the icon slightly when the password is visible
+            eyeIcon.style.opacity = type === 'password' ? '1' : '0.5';
+        });
+    </script>
     </div>
 </body>
 </html>
