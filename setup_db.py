@@ -24,13 +24,11 @@ cursor.execute("""
 
 print("Hashing passwords...")
 # 2. Scramble the passwords BEFORE sending them to the database
-ryan_secure_hash = generate_password_hash("admin123")
-alice_secure_hash = generate_password_hash("pass123")
+test_secure_hash = generate_password_hash("admin")
 
 print("Saving users to database...")
 insert_query = "INSERT INTO users (username, password) VALUES (%s, %s)"
-cursor.execute(insert_query, ("Ryan", ryan_secure_hash))
-cursor.execute(insert_query, ("Alice", alice_secure_hash))
+cursor.execute(insert_query, ("Test", test_secure_hash))
 
 conn.commit()
 cursor.close()
