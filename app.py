@@ -71,7 +71,10 @@ def login():
             
     return render_template('login.html')
 
-
+@app.route('/logout')
+def logout():
+    session.pop('user', None) # Erases the user from the server's memory
+    return redirect(url_for('login')) # Kicks them back to the login screen
 
 # --- PROTECTED APP ROUTES ---
 @app.route('/')
