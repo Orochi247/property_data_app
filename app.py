@@ -223,12 +223,12 @@ def delete_entry(hid):
             sheet.delete_rows(cell.row)
         
         # 2. Delete from SQL
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("DELETE FROM tracker_data WHERE hid = %s", (hid,))
-        conn.commit()
-        cur.close()
-        conn.close()
+        #conn = get_db_connection()
+        #cur = conn.cursor()
+        #cur.execute("DELETE FROM tracker_data WHERE hid = %s", (hid,))
+        #conn.commit()
+        #cur.close()
+        #conn.close()
 
         return jsonify({"status": "success"})
     except Exception as e:
