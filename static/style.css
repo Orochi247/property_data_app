@@ -135,30 +135,32 @@ body {
 .step-header {
     display: flex;
     align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 1rem;
+    padding-bottom: 0;
+    border-bottom: none;
 }
 
 .step-badge {
     background-color: var(--houzeo-blue);
     color: white;
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 6px;
     font-weight: 700;
-    font-size: 0.9rem;
-    margin-right: 12px;
+    font-size: 0.75rem;
+    margin-right: 10px;
 }
 
 .step-title {
-    font-size: 1.1rem;
+    font-size: 0.85rem;
     font-weight: 700;
     margin: 0;
-    color: var(--text-dark);
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* Select2 Overrides */
