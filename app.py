@@ -91,7 +91,7 @@ def submit():
 
 #saves the sheet
         sheet.append_row(new_row)
-        return jsonify({"status": "success", "message": f"Saved {hid}!"})
+        return jsonify({"status": "success", "message": f"Saved {hid}, Time Taken: {time_taken_string}!"})
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
