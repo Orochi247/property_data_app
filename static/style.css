@@ -496,3 +496,50 @@ html, body {
 [data-label="TIME LOG"] div {
     white-space: nowrap !important;
 }
+
+/* --- GUY WALDMAN BUTTON CONCEPT --- */
+.concept-btn {
+    position: relative;
+    overflow: hidden;
+    height: 48px; /* Locks the height so the form doesn't jump */
+    transition: all 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+    border: none;
+}
+
+/* 1. The Shrinking Loading Line State */
+.concept-btn.is-loading {
+    height: 6px;
+    width: 50%;          /* Shrinks horizontally */
+    margin: 0 auto;      /* Keeps it centered */
+    border-radius: 50px;
+    color: transparent;  /* Hides the text */
+    background-color: #e9ecef !important; /* Light gray track */
+    pointer-events: none;
+}
+
+/* The sweeping blue loading bar inside the line */
+.concept-btn.is-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -30%;
+    height: 100%;
+    width: 30%;
+    background-color: #0d6efd; /* Bootstrap Primary Blue */
+    border-radius: 50px;
+    animation: sweep 1s infinite linear;
+}
+
+@keyframes sweep {
+    0% { left: -30%; }
+    100% { left: 100%; }
+}
+
+/* 2. The Success State */
+.concept-btn.is-success {
+    background-color: #198754 !important; /* Bootstrap Success Green */
+    color: white;
+    width: 100%;
+    border-radius: 8px;
+    pointer-events: none;
+}

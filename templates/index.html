@@ -123,9 +123,9 @@
                 </div>
 
                 <div class="mt-5">
-                    <button type="submit" class="btn btn-brand w-100" id="submitBtn">
-                        <span id="btnText">Save Entry</span>
-                    </button>
+                    <button type="submit" id="submitBtn" class="btn btn-primary w-100 fw-bold concept-btn mt-3">
+    <span class="btn-text">Save Entry</span>
+</button>
                 </div>
             </form>
         </div>
@@ -164,211 +164,228 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
-        let isEditMode = false;
+    let isEditMode = false;
 
-        async function refreshTable() {
-            try {
-                const res = await fetch('/get_recent');
-                const data = await res.json();
-                let html = '';
+    // --- 1. Fetch & Render Table ---
+    async function refreshTable() {
+        try {
+            const res = await fetch('/get_recent'); // Make sure this matches your Flask route!
+            const data = await res.json();
+            let html = '';
+            
+            data.forEach(row => {
+                const rowDataStr = encodeURIComponent(JSON.stringify(row));
+                const isFound = (row[6] === 'Found' || row[6] === 'Data Found');
                 
-                data.forEach(row => {
-                    const rowDataStr = encodeURIComponent(JSON.stringify(row));
-                    const isFound = (row[6] === 'Found' || row[6] === 'Data Found');
-                    const statusClass = isFound ? 'bg-found' : 'bg-not-found';
-                    const statusText = isFound ? 'Found' : 'Not Found';
-                    
-                    html += `<tr>
-        <td data-label="HID"><span class="fw-bold">${row[0]}</span></td>
-        <td data-label="AGENT">${row[1]}</td>
-        <td data-label="PROPERTY DETAILS">
-            <div class="d-flex flex-column align-items-end align-items-md-start text-end text-md-start">
-                <div class="fw-bold text-dark text-wrap">${row[2]}</div>
-                <div class="mt-1 d-flex flex-wrap justify-content-end justify-content-md-start gap-1">
-                    <span class="type-pill">${row[3] || '-'}</span> 
-                    <span class="type-pill">${row[4] || '-'}</span>
-                </div>
-            </div>
-        </td>
-        <td data-label="STATUS">
-            <span class="status-badge ${row[6] === 'Found' ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}">
-                ${row[6]}
-            </span>
-        </td>
-        <td data-label="TIME LOG">
-            <div class="fw-bold text-dark">${row[7] || '0H 0M'}</div>
-            <div class="text-muted small">${row[5] || ''}</div>
-        </td>
-        <td class="text-end" data-label="ACTION">
-            <div class="action-container" id="actions-${row[0]}">
-                <div class="action-group">
-                    <button type="button" class="btn btn-action btn-edit-mode edit-btn" data-row="${rowDataStr}">Edit</button>
-                    <button type="button" class="btn btn-action btn-delete-mode" onclick="deleteEntry('${row[0]}')">Delete</button>
-                </div>
-            </div>
-        </td>
-    </tr>`;
-                });
-                $('#entriesBody').html(html || '<tr><td colspan="6" class="text-center py-4 text-muted">No data found</td></tr>');
-            } catch (err) {
-                console.error("Table Load Error:", err);
-            }
-        }
-function cancelEdit() {
-    isEditMode = false;
-    $('#dataForm')[0].reset();
-    $('#mls_name').val(null).trigger('change');
-    $('#msg').empty(); //hide the top editing message
-    $('#hid').prop('readonly', false).removeClass('bg-light');
-    
-    
-
-    // Reset Submit Button to Original Blue
-    $('#submitBtn').removeClass('btn-warning').addClass('btn-primary');
-    $('#btnText').text('Save Entry');
-    
-    // Refresh table to restore Edit/Delete buttons
-    refreshTable();
-}
-
-
-            // --- 3. The Delete Function ---
-async function deleteEntry(hid) {
-    if (confirm(`Are you sure you want to delete HID: ${hid} from the Database and Google Sheet?`)) {
-        const response = await fetch(`/delete/${hid}`, { method: 'DELETE' });
-        const result = await response.json();
-        if (result.status === 'success') {
-            refreshTable();
-        } else {
-            alert("Error deleting: " + result.message);
+                html += `<tr>
+                    <td data-label="HID"><span class="fw-bold">${row[0]}</span></td>
+                    <td data-label="AGENT">${row[1]}</td>
+                    <td data-label="PROPERTY DETAILS">
+                        <div class="d-flex flex-column align-items-end align-items-md-start text-end text-md-start">
+                            <div class="fw-bold text-dark text-wrap">${row[2]}</div>
+                            <div class="mt-1 d-flex flex-wrap justify-content-end justify-content-md-start gap-1">
+                                <span class="type-pill">${row[3] || '-'}</span> 
+                                <span class="type-pill">${row[4] || '-'}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="STATUS">
+                        <span class="status-badge ${isFound ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}">
+                            ${row[6]}
+                        </span>
+                    </td>
+                    <td data-label="TIME LOG">
+                        <div class="fw-bold text-dark">${row[7] || '0H 0M'}</div>
+                        <div class="text-muted small">${row[5] || ''}</div>
+                    </td>
+                    <td class="text-end" data-label="ACTION">
+                        <div class="action-container" id="actions-${row[0]}">
+                            <div class="action-group">
+                                <button type="button" class="btn btn-action btn-edit-mode edit-btn" data-row="${rowDataStr}">Edit</button>
+                                <button type="button" class="btn btn-action btn-delete-mode" onclick="deleteEntry('${row[0]}')">Delete</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            $('#entriesBody').html(html || '<tr><td colspan="6" class="text-center py-4 text-muted">No data found</td></tr>');
+        } catch (err) {
+            console.error("Table Load Error:", err);
         }
     }
-}
-        $(document).ready(function() {
-            // Apply Select2 and Flatpickr
-            $('.searchable-select').select2({ width: '100%' });
-            flatpickr(".time-picker", { enableTime: true, noCalendar: true, dateFormat: "H:i:S", time_24hr: true, enableSeconds: true });
+
+    // --- 2. Delete Logic ---
+    async function deleteEntry(hid) {
+        if (confirm(`Are you sure you want to delete HID: ${hid} from the Database and Google Sheet?`)) {
+            const response = await fetch(`/delete/${hid}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (result.status === 'success') {
+                refreshTable();
+            } else {
+                alert("Error deleting: " + result.message);
+            }
+        }
+    }
+
+    // --- MAIN JQUERY BLOCK ---
+    $(document).ready(function() {
+        // Init plugins
+        $('.searchable-select').select2({ width: '100%' });
+        flatpickr(".time-picker", { enableTime: true, noCalendar: true, dateFormat: "H:i:S", time_24hr: true, enableSeconds: true });
+        
+        refreshTable();
+
+        // --- 3. Edit Button Click ---
+        $('#entriesBody').on('click', '.edit-btn', function() {
+            const rowDataStr = $(this).attr('data-row');
+            const row = JSON.parse(decodeURIComponent(rowDataStr));
+            const hid = row[0];
+
+            // Populate form
+            $('#hid').val(row[0]).prop('readonly', true); 
+            $('#mls_name').val(row[2]).trigger('change'); 
+            $('#prop_type').val(row[3]); 
+            $('#home_type').val(row[4]);
+            $('#listing_date').val(row[5]);
             
-            refreshTable();
-            // Edit Logic
-            $('#entriesBody').on('click', '.edit-btn', function() {
-                const rowDataStr = $(this).attr('data-row');
-                const row = JSON.parse(decodeURIComponent(rowDataStr));
-                const hid = row[0];
+            if (row[6] === 'Found' || row[6] === 'Data Found') {
+                $('#status').val('Found');
+            } else {
+                $('#status').val('Not Found');
+            }
+            
+            $('#start_time').val('').removeAttr('required');
+            $('#end_time').val('').removeAttr('required');
+            
+            isEditMode = true;
 
-                
-                
-                $('#hid').val(row[0]).prop('readonly', true); 
-                $('#mls_name').val(row[2]).trigger('change'); 
-                $('#prop_type').val(row[3]); 
-                $('#home_type').val(row[4]);
-                $('#listing_date').val(row[5]);
-                
-                if (row[6] === 'Found' || row[6] === 'Data Found') {
-                    $('#status').val('Found');
-                } else {
-                    $('#status').val('Not Found');
-                }
-                
-                $('#start_time').val('').removeAttr('required');
-                $('#end_time').val('').removeAttr('required');
-                
-                isEditMode = true;
+            // Update UI for editing
+            $('#submitBtn').removeClass('btn-primary').addClass('btn-warning');
+            $('#submitBtn').find('.btn-text').text('Update Entry'); // Fixed ID reference
+            $('#msg').html(`
+                <div class="container mt-3 mb-1">
+                    <div class="alert alert-warning fw-bold border-0 shadow-sm d-flex align-items-center justify-content-center py-3" 
+                         style="background-color: #fef3c7; color: #92400e; border-radius: 12px;">
+                        <span class="me-2">✎</span> Editing Record HID: ${row[0]}
+                    </div>
+                </div>
+            `);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                $('#submitBtn').removeClass('btn-primary').addClass('btn-warning');
-                $('#btnText').text('Update Entry');
-                $('#msg').html(`
-    <div class="container mt-3 mb-1">
-        <div class="alert alert-warning fw-bold border-0 shadow-sm d-flex align-items-center justify-content-center py-3" 
-             style="background-color: #fef3c7; color: #92400e; border-radius: 12px;">
-            <span class="me-2">✎</span> Editing Record HID: ${row[0]}
-        </div>
-    </div>
-`);
-window.scrollTo({
-        top: 0,
-        behavior: 'smooth' 
-    });
-                $(`#actions-${hid}`).html(`
-        <button class="btn btn-cancel-pill rounded-pill fw-bold" onclick="cancelEdit()">
-            ✕ Cancel
-        </button>
-    `);
-            });
-
-
-            // Submit Logic
-            $('#dataForm').on('submit', async function(e) {
-                e.preventDefault();
-
-                if (!this.checkValidity()) {
-                    this.reportValidity();
-                    return; 
-                }
-
-                const btn = $('#submitBtn');
-                const btnText = $('#btnText');
-                btn.prop('disabled', true);
-                btnText.text(isEditMode ? 'Updating Server...' : 'Saving Record...'); 
-
-                // Notice: 'user_name' is no longer included in the payload. The server handles it safely now!
-                const payload = {
-                    hid: $('#hid').val(), 
-                    mls_name: $('#mls_name').val(),
-                    prop_type: $('#prop_type').val(),
-                    home_type: $('#home_type').val(),
-                    listing_date: $('#listing_date').val(),
-                    status: $('#status').val(),
-                    start_time: $('#start_time').val(), 
-                    end_time: $('#end_time').val()
-                };
-
-                const endpoint = isEditMode ? '/update' : '/submit';
-
-                try {
-                    const res = await fetch(endpoint, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(payload)
-                    });
-                    cancelEdit();
-                    $('#msg').html('<div class="alert alert-success py-2">✓ Entry Updated!</div>');
-                    setTimeout(() => $('#msg').empty(), 3000);
-                    
-                    if (!res.ok) {
-                        const errData = await res.json();
-                        throw new Error(errData.message || `Server returned ${res.status}`);
-                    }
-                    
-                    const result = await res.json();
-
-                    if (result.status === "success") {
-                        $('#msg').html(`<div class="alert alert-success fw-bold border-0 shadow-sm" style="background-color: #dcfce7; color: #166534;">✅ ${result.message}</div>`);
-                        
-                        $('#dataForm')[0].reset();
-                        $('#mls_name').val(null).trigger('change');
-                        
-                        if (isEditMode) {
-                            isEditMode = false;
-                            $('#hid').prop('readonly', false); 
-                            $('#start_time').attr('required', true); 
-                            $('#end_time').attr('required', true);
-                            $('#submitBtn').css({'background-color': '', 'border-color': ''}); 
-                        }
-                        
-                        refreshTable(); 
-                    }
-                } catch (err) {
-                    $('#msg').html(`<div class="alert alert-danger fw-bold border-0 shadow-sm" style="background-color: #fee2e2; color: #991b1b;">❌ Error: ${err.message}</div>`);
-                } finally {
-                    btn.prop('disabled', false);
-                    btnText.text(isEditMode ? 'Update Entry' : 'Save Entry'); 
-                    if(!isEditMode && !btn.prop('disabled')){
-                        setTimeout(() => { $('#msg').empty(); }, 5000);
-                    }
-                }
-            });
+            // Toggle Edit/Cancel buttons in table safely
+            let $actionTd = $(`#actions-${hid}`);
+            $actionTd.children().hide(); // Hide edit/delete
+            
+            // Inject temp cancel button
+            $actionTd.append(`
+                <button type="button" class="btn btn-cancel-pill rounded-pill fw-bold cancel-temp-btn" data-hid="${hid}">
+                    ✕ Cancel
+                </button>
+            `);
         });
+
+        // --- 4. Cancel Button Click (Event Delegation) ---
+        $('#entriesBody').on('click', '.cancel-temp-btn', function() {
+            let hid = $(this).data('hid');
+
+            isEditMode = false;
+            $('#dataForm')[0].reset();
+            $('#prop_type').trigger('change');
+            $('#mls_name').val(null).trigger('change');
+            
+            $('#hid').prop('readonly', false); 
+            $('#start_time').attr('required', true); 
+            $('#end_time').attr('required', true);
+            
+            let $btn = $('#submitBtn');
+            $btn.removeClass('is-loading is-success btn-warning').addClass('btn-primary').prop('disabled', false);
+            $btn.css({'background-color': '', 'border-color': ''}); 
+            $btn.find('.btn-text').text('Save Entry');
+            
+            // Restore table buttons
+            let $actionTd = $(`#actions-${hid}`);
+            $(this).remove(); 
+            $actionTd.children().show(); 
+            
+            $('#msg').empty();
+        });
+
+        // --- 5. Submit Form Logic ---
+        $('#dataForm').on('submit', async function(e) {
+            e.preventDefault();
+
+            if (!this.checkValidity()) {
+                this.reportValidity();
+                return; 
+            }
+
+            let $btn = $('#submitBtn');
+            let $btnText = $btn.find('.btn-text');
+            $btn.addClass('is-loading');
+
+            const payload = {
+                hid: $('#hid').val(), 
+                mls_name: $('#mls_name').val(),
+                prop_type: $('#prop_type').val(),
+                home_type: $('#home_type').val(),
+                listing_date: $('#listing_date').val(),
+                status: $('#status').val(),
+                start_time: $('#start_time').val(), 
+                end_time: $('#end_time').val()
+            };
+
+            const endpoint = isEditMode ? '/update' : '/submit';
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.message || `Server returned ${res.status}`);
+                }
+                
+                const result = await res.json();
+                await new Promise(resolve => setTimeout(resolve, 600));
+
+                if (result.status === "success") {
+                    $btn.removeClass('is-loading btn-warning').addClass('is-success');
+                    $btnText.html('&#10004; Saved!'); 
+                    
+                    $('#msg').html(`<div class="alert alert-success fw-bold border-0 shadow-sm" style="background-color: #dcfce7; color: #166534;">✅ ${result.message}</div>`);
+                    
+                    // Reset everything
+                    $('#dataForm')[0].reset();
+                    $('#mls_name').val(null).trigger('change');
+                    $('#prop_type').trigger('change'); 
+                    
+                    if (isEditMode) {
+                        isEditMode = false;
+                        $('#hid').prop('readonly', false); 
+                        $('#start_time').attr('required', true); 
+                        $('#end_time').attr('required', true);
+                    }
+                    
+                    refreshTable(); 
+
+                    setTimeout(() => {
+                        $btn.removeClass('is-success');
+                        $btn.addClass('btn-primary'); // Ensure it goes back to primary color
+                        $btnText.text('Save Entry'); 
+                    }, 1500);
+                }
+            } catch (err) {
+                $btn.removeClass('is-loading');
+                $btnText.text(isEditMode ? 'Update Entry' : 'Save Entry'); 
+                $('#msg').html(`<div class="alert alert-danger fw-bold border-0 shadow-sm" style="background-color: #fee2e2; color: #991b1b;">❌ Error: ${err.message}</div>`);
+            } finally {
+                setTimeout(() => { $('#msg').empty(); }, 5000);
+            }
+        });
+    });
     </script>
 </body>
 </html>
