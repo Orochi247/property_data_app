@@ -543,3 +543,136 @@ html, body {
     border-radius: 8px;
     pointer-events: none;
 }
+/* --- SPA SWIPE NAVIGATION CSS --- */
+/* Fix DataTables Dropdown Arrow Overlap */
+div.dataTables_length select {
+    padding-right: 30px !important; /* Pushes the number away from the arrow */
+    min-width: 75px !important;     /* Gives the box a nice, readable width */
+    background-position: right 0.5rem center !important; /* Anchors the arrow */
+}
+.app-viewport {
+    overflow: hidden; 
+    width: 100%;
+    position: relative;
+    padding-bottom: 50px;
+}
+
+.app-slider {
+    display: flex;
+    width: 100%; /* Changed from 300% */
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); 
+}
+
+.app-page {
+    flex: 0 0 100%; /* This forces EVERY page to be exactly 100% of the screen width */
+    max-width: 100%;
+    padding: 5px; 
+    box-sizing: border-box; /* Ensures padding doesn't break the width */
+}
+/* Nav Bar Pill Styles */
+.nav-link.swipe-btn { 
+    border: none; 
+    background: transparent; 
+    color: #6c757d; 
+    transition: all 0.3s; 
+    cursor: pointer;
+}
+.nav-link.swipe-btn:hover { background: #f8f9fa; color: var(--houzeo-blue); }
+.nav-link.swipe-btn.active { 
+    background: var(--houzeo-blue) !important; 
+    color: white !important; 
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3); 
+}
+
+/* DataTables Premium Styling */
+.dataTables_wrapper .row { margin-bottom: 15px; }
+.dataTables_filter input {
+    border-radius: 50px !important;
+    padding: 5px 15px !important;
+    border: 1px solid #dee2e6 !important;
+    min-width: 250px;
+}
+.dataTables_paginate .page-link { border-radius: 5px; margin: 0 3px; }
+/* --- DATATABLES MOBILE FIXES --- */
+/* --- DATATABLES MOBILE FIXES (CARD UI) --- */
+/* --- DATATABLES MOBILE FIXES (CARD UI) --- */
+@media (max-width: 768px) {
+    /* Hide the traditional header */
+    #masterTable thead {
+        display: none;
+    }
+    
+    /* 1. SEPARATORS: Turn every row into a floating Card */
+    .table-custom tbody tr {
+        display: block;
+        margin-bottom: 24px; /* Big gap between entries */
+        border: 2px solid #e9ecef !important; /* Distinct outline */
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03); /* Premium shadow */
+        overflow: hidden;
+    }
+
+    /* Remove the bottom line from the very last item (Log Date) in the card */
+    .table-custom tbody td:last-child {
+        border-bottom: none !important;
+    }
+    
+    /* 2. STRETCH: Stack the Search and Dropdown areas */
+    .dataTables_wrapper .row {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        margin: 0;
+    }
+    
+    /* 3. STRETCH: Force the Search bar to absolute full width */
+    .dataTables_filter {
+        width: 100%;
+    }
+    
+    .dataTables_filter input {
+        width: 100% !important;
+        max-width: 100% !important; /* Overrides Bootstrap's hidden limits */
+        box-sizing: border-box !important;
+        margin-left: 0 !important;
+        margin-top: 8px !important;
+    }
+
+    /* 4. MAGIC: Hide the broken text and create a unified "Show entries" label above */
+    .dataTables_length label {
+        font-size: 0 !important; /* Hides the original "Show [box] entries" text */
+        width: 100%;
+    }
+    
+    .dataTables_length label::before {
+        content: "Show entries"; /* Creates our new, clean label */
+        font-size: 14px;
+        font-weight: 600;
+        color: #6c757d;
+        display: block;
+        text-align: left;
+        margin-bottom: 8px;
+    }
+    
+    .dataTables_length select {
+        font-size: 16px;
+        width: 100% !important;
+        display: block !important;
+        margin-left: 0 !important;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Target the text inside your stat boxes to make it fit the 2x2 grid */
+    .col-6 .modern-card p {
+        font-size: 11px !important;
+        line-height: 1.2;
+    }
+    .col-6 .modern-card h4 {
+        font-size: 18px !important;
+        margin-top: 5px;
+    }
+}

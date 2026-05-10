@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Houzeo Autofill Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+
 </head>
 <body>
     <div class="wave-background">
@@ -30,6 +33,7 @@
                     Houzeo<span style="color: #333; font-size: 1.2rem; vertical-align: middle;"> Autofill Tracker</span>
                 </h1>
             </div>
+            
 
             <div class="header-divider"></div>
 
@@ -40,11 +44,22 @@
                 <a href="/logout" class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3 py-2">Logout</a>
             </div>
             
-        </div>   
+        </div>
+        <div class="modern-card p-2 mb-4 d-flex justify-content-center gap-2" id="mainNav">
+        <button class="nav-link swipe-btn active fw-bold px-4 py-2 rounded-pill" data-index="0">Data Entry</button>
+        <button class="nav-link swipe-btn fw-bold px-4 py-2 rounded-pill" data-index="1">Insights</button>
+        <button class="nav-link swipe-btn fw-bold px-4 py-2 rounded-pill" data-index="2">All Entries</button>
+    </div>
 
-        <div id="msg" class="mb-4 text-center"></div>
+    <div id="msg" class="mb-4 text-center"></div>
 
-        <div class="modern-card">
+    <div class="app-viewport">
+        <div class="app-slider" id="appSlider">
+
+            
+            <div class="app-page">
+            
+                <div class="modern-card">
             <form id="dataForm">
                 
                 <div class="step-header">
@@ -158,10 +173,116 @@
             </div>
         </div>
     </div>
+    <div class="app-page">
+    <div class="modern-card p-4">
+        <h3 class="mb-4" style="color: var(--houzeo-blue); font-weight: 800;">Time & Efficiency Analytics</h3>
+        
+        <div class="row text-center mb-3">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="p-3 border rounded-3 bg-light h-100">
+            <h6 class="text-muted fw-bold mb-1" style="font-size: 0.8rem;">Total Processed</h6>
+            <h3 class="fw-bold text-dark mb-0" id="statTotal">--</h3>
+        </div>
+    </div>
+    
+    <div class="col-6 col-md-3 mb-3">
+        <div class="p-3 border rounded-3 bg-light h-100">
+            <h6 class="text-muted fw-bold mb-1" style="font-size: 0.8rem;">Success Rate</h6>
+            <h3 class="fw-bold text-success mb-0" id="statSuccess">--%</h3>
+        </div>
+    </div>
+    
+    <div class="col-6 col-md-3 mb-3">
+        <div class="p-3 border rounded-3 bg-light h-100">
+            <h6 class="text-muted fw-bold mb-1" style="font-size: 0.8rem;">Avg Time (Found)</h6>
+            <h4 class="fw-bold text-primary mb-0" id="statAvgFound">--</h4>
+        </div>
+    </div>
+    
+    <div class="col-6 col-md-3 mb-3">
+        <div class="p-3 border rounded-3 bg-light h-100">
+            <h6 class="text-muted fw-bold mb-1" style="font-size: 0.8rem;">Avg Time (Not Found)</h6>
+            <h4 class="fw-bold text-danger mb-0" id="statAvgNotFound">--</h4>
+        </div>
+    </div>
+</div>
 
+        <div class="alert bg-success-light text-success border-success fw-bold text-center mb-4" style="border-radius: 12px;">
+            ⚡ Fastest MLS (Found): <span id="fastestFound" class="text-dark">--</span> 
+            <span class="mx-2 text-muted">|</span> 
+            Fastest MLS (Not Found): <span id="fastestNotFound" class="text-dark">--</span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-5 mb-4 mb-md-0">
+                <h6 class="fw-bold text-center text-muted mb-3">Status Distribution</h6>
+                <div style="position: relative; height: 250px; width: 100%;">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <h6 class="fw-bold text-center text-muted mb-3">Time vs MLS Comparison (Top 5)</h6>
+                <div style="position: relative; height: 250px; width: 100%;">
+                    <canvas id="timeCompareChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modern-card p-4 mb-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #8e2de2;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0" style="color: #4a00e0;">✨ AI Executive Summary</h5>
+                <button class="btn btn-sm btn-dark rounded-pill px-3" onclick="generateAISummary()" id="aiBtn">
+                    Generate Report
+                </button>
+            </div>
+            <div id="aiContent" class="text-muted">
+                <p class="mb-0">Click the button to have AI analyze your current database and identify operational bottlenecks.</p>
+            </div>
+        </div>
+</div>
+
+            <!-- PAGE 3: ALL ENTRIES PLACEHOLDER -->
+            <div class="app-page">
+                <div class="app-page">
+    <div class="modern-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 style="color: var(--houzeo-blue); font-weight: 800; margin: 0;">Master Data Ledger</h3>
+            <button class="btn btn-sm btn-outline-secondary fw-bold rounded-pill" onclick="loadMasterLedger()">
+                🔄 Sync Database
+            </button>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-custom table-hover w-100" id="masterTable">
+                <thead>
+                    <tr>
+                        <th>HID</th>
+                        <th>Agent</th>
+                        <th>MLS Name</th>
+                        <th>Property Type</th>
+                        <th>Status</th>
+                        <th>Time Log</th>
+                        <th>Log Date</th>
+                    </tr>
+                </thead>
+                <tbody id="masterBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+            </div>
+            </div>   
+
+        <div id="msg" class="mb-4 text-center"></div>
+        
+
+        
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
     <script>
     let isEditMode = false;
@@ -226,9 +347,97 @@
             }
         }
     }
+// --- MASTER LEDGER LOGIC ---
+async function loadMasterLedger() {
+    try {
+        // 1. Give the user some visual feedback
+        const $syncBtn = $('button[onclick="loadMasterLedger()"]');
+        const originalText = $syncBtn.html();
+        $syncBtn.html('⏳ Syncing...');
+
+        // 2. Fetch the entire database history
+        const res = await fetch('/get_all_entries');
+        const data = await res.json();
+
+        // 3. If a DataTable already exists, destroy it so we can rebuild it cleanly
+        if ($.fn.DataTable.isDataTable('#masterTable')) {
+            $('#masterTable').DataTable().clear().destroy();
+        }
+
+        // 4. Build the HTML for the rows
+        let html = '';
+        data.forEach(row => {
+            // row formatting based on our SQL query:
+            // 0:hid, 1:agent, 2:mls_name, 3:prop_type, 4:status, 5:time_log, 6:log_date
+            
+            const isFound = (row[4] === 'Found' || row[4] === 'Data Found');
+            const statusBadge = `<span class="status-badge ${isFound ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}">${row[4]}</span>`;
+            
+            html += `
+            <tr>
+                <td data-label="HID" class="fw-bold">${row[0]}</td>
+                <td data-label="AGENT">${row[1]}</td>
+                <td data-label="MLS NAME" class="fw-bold text-wrap">${row[2]}</td>
+                <td data-label="PROPERTY TYPE"><span class="type-pill">${row[3] || '-'}</span></td>
+                <td data-label="STATUS">${statusBadge}</td>
+                <td data-label="TIME LOG" class="fw-bold">${row[5] || '-'}</td>
+                <td data-label="LOG DATE" class="text-muted small">${row[6]}</td>
+            </tr>`;
+        });
+
+        // 5. Inject the rows into the table
+        $('#masterBody').html(html);
+
+        // 6. 🚀 IGNITE DATATABLES 🚀
+        $('#masterTable').DataTable({
+            pageLength: 25,             // Show 25 entries per page
+            order: [[6, 'desc']],       // Sort by Log Date (Column 6) descending by default
+            destroy: true,              // Failsafe to allow re-initialization
+            language: {
+                search: "",             // Removes the word "Search:" next to the box
+                searchPlaceholder: "Search HID, Agent, MLS..."
+            }
+        });
+
+        // 7. Reset the sync button
+        $syncBtn.html(originalText);
+
+    } catch (err) {
+        console.error("Ledger Load Error:", err);
+        $('button[onclick="loadMasterLedger()"]').html('❌ Error');
+    }
+}
 
     // --- MAIN JQUERY BLOCK ---
     $(document).ready(function() {
+
+    // --- SPA Navigation Slider Logic ---
+// --- SPA Navigation Slider Logic ---
+$('.swipe-btn').on('click', function() {
+    $('.swipe-btn').removeClass('active');
+    $(this).addClass('active');
+
+    let pageIndex = $(this).data('index');
+    let slidePercentage = -(pageIndex * 100);
+
+    $('#appSlider').css('transform', `translateX(${slidePercentage}%)`);
+    if (pageIndex === 1) {
+        loadInsights();
+    }
+    
+    // 👇 NEW LOGIC: Load the Master Ledger when Tab 3 is clicked! 👇
+    if (pageIndex === 2) {
+        if (!$.fn.DataTable.isDataTable('#masterTable')) {
+            loadMasterLedger();
+        } else {
+            // If it's already loaded, force DataTables to recalculate its width 
+            // after the 0.5s slide animation finishes!
+            setTimeout(() => {
+                $('#masterTable').DataTable().columns.adjust().draw();
+            }, 550);
+        }
+    }
+});
         // Init plugins
         $('.searchable-select').select2({ width: '100%' });
         flatpickr(".time-picker", { enableTime: true, noCalendar: true, dateFormat: "H:i:S", time_24hr: true, enableSeconds: true });
@@ -386,6 +595,105 @@
             }
         });
     });
+    // --- INSIGHTS DASHBOARD LOGIC ---
+window.myCharts = {};
+
+async function loadInsights() {
+    try {
+        const res = await fetch('/api/insights');
+        const data = await res.json();
+
+        if (data.error) return;
+
+        // 1. Update the Text Stats
+        $('#statTotal').text(data.total);
+        $('#statSuccess').text(data.success_rate + '%');
+        $('#statAvgFound').text(data.avg_found);
+        $('#statAvgNotFound').text(data.avg_not_found);
+        $('#fastestFound').text(data.fastest_found);
+        $('#fastestNotFound').text(data.fastest_not_found);
+
+        // 2. Destroy old charts
+        if (window.myCharts.status) window.myCharts.status.destroy();
+        if (window.myCharts.time) window.myCharts.time.destroy();
+
+        // 3. Status Doughnut Chart
+        const ctxStatus = document.getElementById('statusChart').getContext('2d');
+        window.myCharts.status = new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(data.status_counts),
+                datasets: [{
+                    data: Object.values(data.status_counts),
+                    backgroundColor: ['#198754', '#dc3545', '#ffc107', '#0d6efd', '#6c757d'],
+                    borderWidth: 0
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // 4. Time Comparison Grouped Bar Chart
+        const ctxTime = document.getElementById('timeCompareChart').getContext('2d');
+        window.myCharts.time = new Chart(ctxTime, {
+            type: 'bar',
+            data: {
+                labels: data.chart_labels, // Top 5 MLS names
+                datasets: [
+                    {
+                        label: 'Avg Minutes (Found)',
+                        data: data.chart_found,
+                        backgroundColor: '#0d6efd',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Avg Minutes (Not Found)',
+                        data: data.chart_not_found,
+                        backgroundColor: '#dc3545',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { title: { display: true, text: 'Time in Minutes' }, beginAtZero: true } }
+            }
+        });
+
+    } catch (err) {
+        console.error("Failed to load insights:", err);
+    }
+}
+// --- AI SUMMARY LOGIC ---
+async function generateAISummary() {
+    const $btn = $('#aiBtn');
+    const $content = $('#aiContent');
+    
+    // 1. Loading State
+    $btn.prop('disabled', true).html('🧠 Thinking...');
+    $content.html('<p class="mb-0 text-primary animate__animated animate__pulse animate__infinite">Analyzing database trends...</p>');
+
+    try {
+        // 2. Fetch from the Python AI Route
+        const res = await fetch('/api/ai_summary');
+        const data = await res.json();
+
+        if (data.error) throw new Error(data.error);
+
+        // 3. Inject the AI HTML
+        $content.html(`<ul class="mb-0" style="color: #2b2b2b;">${data.summary}</ul>`);
+        
+    } catch (err) {
+        console.error("AI Fetch Error:", err);
+        $content.html(`<p class="mb-0 text-danger">⚠️ Could not connect to AI. Please try again later.</p>`);
+    } finally {
+        // 4. Reset Button
+        $btn.prop('disabled', false).html('↻ Refresh Report');
+    }
+}
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js">
     </script>
 </body>
 </html>
