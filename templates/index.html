@@ -410,6 +410,55 @@ async function loadMasterLedger() {
 
     // --- MAIN JQUERY BLOCK ---
     $(document).ready(function() {
+// --- NATIVE MOBILE SWIPE LOGIC ---
+    let touchstartX = 0;
+    let touchstartY = 0;
+    let touchendX = 0;
+    let touchendY = 0;
+
+    const slider = document.getElementById('appSlider');
+
+    // 1. Record where the finger first touches the screen
+    slider.addEventListener('touchstart', function(event) {
+        touchstartX = event.changedTouches[0].screenX;
+        touchstartY = event.changedTouches[0].screenY;
+    }, {passive: true});
+
+    // 2. Record where the finger leaves the screen
+    slider.addEventListener('touchend', function(event) {
+        touchendX = event.changedTouches[0].screenX;
+        touchendY = event.changedTouches[0].screenY;
+        handleSwipe();
+    }, {passive: true});
+
+    // 3. The Smart Math
+    function handleSwipe() {
+        let diffX = touchstartX - touchendX;
+        let diffY = touchstartY - touchendY;
+
+        // Check 1: Did they scroll up/down? If Y distance is greater than X, ignore it.
+        if (Math.abs(diffY) > Math.abs(diffX)) return;
+
+        // Check 2: Was it a real swipe or just an accidental tap? (Requires 50px of movement)
+        if (Math.abs(diffX) > 50) {
+            let currentIndex = $('.swipe-btn.active').data('index');
+            let newIndex = currentIndex;
+
+            if (diffX > 0) {
+                // Swiped left (finger moved left) -> Go to NEXT page
+                newIndex++;
+            } else {
+                // Swiped right (finger moved right) -> Go to PREVIOUS page
+                newIndex--;
+            }
+
+            // Boundary Check: Make sure we don't swipe off the edge of the 3 pages
+            if (newIndex >= 0 && newIndex <= 2) {
+                // Automatically click the correct navigation button for them!
+                $(`.swipe-btn[data-index="${newIndex}"]`).trigger('click');
+            }
+        }
+    }
 
     // --- SPA Navigation Slider Logic ---
 // --- SPA Navigation Slider Logic ---
