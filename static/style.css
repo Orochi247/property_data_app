@@ -284,6 +284,27 @@ body {
     .header-user {
         justify-content: center !important;
     }
+    /* --- MOBILE SCROLLING PILL NAVIGATION --- */
+    #mainNav {
+        justify-content: flex-start !important; /* Fixes the left/right clipping issue */
+        overflow-x: auto !important;            /* Allows horizontal scrolling */
+        white-space: nowrap !important;         /* Forces pills to stay in a single line */
+        padding: 10px 16px !important;          /* Gives breathable breathing room on edges */
+        -webkit-overflow-scrolling: touch;       /* Smooth momentum scrolling on iPhones */
+        scrollbar-width: none;                  /* Hides scrollbar on Firefox */
+    }
+
+    /* Hides the ugly desktop scrollbar on Chrome, Safari, and Opera */
+    #mainNav::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Keep the buttons from squishing or shrinking */
+    #mainNav .swipe-btn {
+        flex: 0 0 auto !important;              /* Absolute requirement to stop text compression */
+        font-size: 0.85rem !important;          /* Slightly scales font for perfect mobile density */
+        padding: 8px 16px !important;           /* Clean button padding */
+    }
 }
 
 /* --- MOBILE TABLE-TO-CARD CONVERSION --- */
