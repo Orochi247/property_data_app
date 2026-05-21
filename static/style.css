@@ -297,12 +297,28 @@ body {
     }
 
     /* Target mobile viewports specifically */
+    /* Clean Mobile Density Overrides */
     @media (max-width: 576px) {
         #mainNav {
-            /* If 4 buttons exist, align left to scroll. If 3 exist, it naturally stays balanced via flex-grow */
-            justify-content: flex-start !important; 
-            padding-left: 12px !important;
-            padding-right: 12px !important;
+            justify-content: space-around !important; /* Perfect even spacing for 3 buttons */
+            overflow-x: auto !important;
+            white-space: nowrap !important;
+            padding: 8px 12px !important;
+            gap: 4px !important;
+        }
+
+        /* Stop buttons from ballooning out of proportion */
+        #mainNav .swipe-btn {
+            flex: 0 1 auto !important;  /* Allows natural sizing without breaking track boundaries */
+            width: auto !important;
+            padding: 8px 14px !important;
+            font-size: 0.85rem !important;
+            text-align: center;
+        }
+        
+        /* If 4 buttons are rendered, switch layout strategy to a scrolling carousel automatically */
+        #mainNav:has(button[data-index="3"]) {
+            justify-content: flex-start !important;
             gap: 8px !important;
         }
     }
