@@ -1,8 +1,8 @@
 import os
 import json
 import gspread
-import google.generativeai as genai
-import threading
+from google import genai
+import threading    
 from oauth2client.service_account import ServiceAccountCredentials
 import psycopg2
 from psycopg2.extras import RealDictCursor #returns output in a dictionary format
@@ -11,7 +11,7 @@ from functools import wraps
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 from dotenv import load_dotenv
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 load_dotenv()
 
@@ -23,7 +23,7 @@ def get_gspread_client():
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "fallback-secret-for-local-testing")
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 def get_db_connection():
     try: 
@@ -78,6 +78,7 @@ def calculate_time_duration(start_time, end_time):
         return "Invalid Time"
 
 
+
 # --- ROUTES ---
 #log in authentication
 def login_required(f):
@@ -85,46 +86,207 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
             return redirect(url_for('login'))
+        
+        if session.get('needs_reset') and request.endpoint != 'change_password':
+            return redirect(url_for('change_password'))
+        
         return f(*args, **kwargs)
     return decorated_function
 
-# --- LOGIN & LOGOUT ROUTES ---
+# --- AUTH ROUTES ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        form_username = request.form.get('username')
+        # .strip() removes invisible spaces at the start or end
+        form_username = request.form.get('username').strip()
         form_password = request.form.get('password')
         
         try:
-            # 1. Open Database Connection
             conn = get_db_connection()
-            if not conn:
-                return render_template('login.html', error="Database connection error. Please try again.")
+            if not conn: return render_template('login.html', error="Database connection error.")
+                
             cursor = conn.cursor(cursor_factory=RealDictCursor)
-
-            # 2. Search for user
-            sql_query = "SELECT * FROM users WHERE username = %s"
-            cursor.execute(sql_query, (form_username,))
+            cursor.execute("SELECT * FROM users WHERE username ILIKE %s", (form_username,))
             user = cursor.fetchone()
-            
-            # Close connection
             cursor.close()
             conn.close()
 
-            # 3. Verify Credentials with Password Hashing
             if user and check_password_hash(user['password'], form_password):
+                # 1. Check if they are approved
+                if user.get('status') == 'pending':
+                    return render_template('login.html', error="Your account is waiting for Admin approval.")
+                
+                # 2. Set up their session
                 session['user'] = user['username']
+                session['role'] = user.get('role', 'agent')
+                
+                # 3. If Admin gave them the temp password, force a reset
+                if check_password_hash(user['password'], 'Houzeo'):
+                    session['needs_reset'] = True
+                    return redirect(url_for('change_password'))
+                
+                session['needs_reset'] = False
                 return redirect(url_for('index'))
             else:
-                return render_template('login.html', error="Invalid User ID or Password.")
+                return render_template('login.html', error="Invalid Username or Password.")
         except Exception as e:
-            return render_template('login.html', error="Database connection error. Please try again.")
+            # We keep this one so server crashes are logged, but it doesn't show user data!
+            print(f"LOGIN ERROR: {e}") 
+            return render_template('login.html', error="System error. Please try again.")
             
     return render_template('login.html')
 
+# -- Admin Dashboard Routes
+@app.route('/get_admin_data')
+@login_required
+def get_admin_data():
+    #kick non admins
+    if session.get('role') != 'admin':
+        return jsonify({"status": "error", "message": "Unauthorized access."}), 403
+    
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"status":"error"}), 500
+        
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        #users waiting for approval
+        cur.execute("SELECT username, status FROM users WHERE status = 'pending'")
+        pending_users = cur.fetchall()
+
+        #users waiting for password reset
+        cur.execute("SELECT username FROM users WHERE reset_requested = TRUE")
+        reset_requests = cur.fetchall()
+
+        cur.close()
+        conn.close()
+
+        return jsonify({"status": "success", "pending": pending_users, "resets": reset_requests})
+    except Exception as e:
+        print(f"Admin Fetch Error: {e}")
+        return jsonify({"status":"error"}), 500
+    
+@app.route('/approve_agent', methods=['POST'])
+@login_required
+def approve_agent():
+    if session.get('role') != 'admin':
+            return jsonify({"status":"error"}), 403
+    try:
+        username = request.json.get('username')
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET status = 'approved' WHERE username = %s", (username,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({"status": "success", "message": f"{username} approved!"})
+    except Exception as e:
+        return jsonify({"status":"error"}), 500
+    
+@app.route('/admin_reset_password', methods=['POST'])
+@login_required
+def admin_reset_password():
+    if session.get('role') != 'admin': return jsonify({"status": "error"}), 403
+    
+    try:
+        username = request.json.get('username')
+        temp_pw = generate_password_hash('Houzeo')
+        
+        # --- 🕵️‍♂️ X-RAY DEBUGGING ---
+        print(f"\n--- ADMIN RESET TRIGGERED ---")
+        print(f"Target User: '{username}'")
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # We use ILIKE here too, just to be safe with uppercase/lowercase issues!
+        cur.execute("UPDATE users SET password = %s, reset_requested = FALSE WHERE username ILIKE %s", (temp_pw, username))
+        
+        rows_updated = cur.rowcount
+        print(f"Rows Updated in DB: {rows_updated}")
+        print("-----------------------------\n")
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        if rows_updated == 0:
+            print("CRITICAL WARNING: No user was updated! The username might not match.")
+            
+        return jsonify({"status": "success", "message": f"Password for {username} reset to Houzeo"})
+    except Exception as e:
+        print(f"RESET ERROR: {e}")
+        return jsonify({"status": "error"}), 500
+ 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        conn = get_db_connection()
+        if not conn:
+            return render_template('register.html', error="Database unavailable.")
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        cur.execute("SELECT * FROM users WHERE username = %s", (username,))
+        if cur.fetchone():
+            return render_template('register.html', error="Username already exists. Please choose another.")
+        hashed_pw = generate_password_hash(password)
+
+        cur.execute("""INSERT INTO users (username, password, role, status, reset_requested) 
+            VALUES (%s, %s, 'agent', 'pending', FALSE)""", (username, hashed_pw))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        #success login message
+        return render_template('login.html', success="Account created! Please wait for your Admin to approve it.")
+    return render_template('register.html')
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        conn = get_db_connection()
+        if conn:
+            cur = conn.cursor()
+            cur.execute("UPDATE users SET reset_requested = TRUE WHERE username = %s", (username,))
+            conn.commit()
+            cur.close()
+
+        return render_template('login.html', success="If that username exists, the Admin has been notified to reset the password.")
+    return render_template('forgot_password.html')
+
+@app.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        try:
+            new_password = request.form.get('new_password')
+            hashed_pw = generate_password_hash(new_password)
+            
+            conn = get_db_connection()
+            cur = conn.cursor()
+            # Update password, remove the reset flag, and remove the session lock
+            cur.execute("UPDATE users SET password = %s, reset_requested = FALSE WHERE username = %s", (hashed_pw, session['user']))
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            session['needs_reset'] = False
+            return redirect(url_for('index'))
+        except Exception as e:
+            print(f"PASSWORD UPDATE ERROR: {e}")
+            return "System error while updating password. Please check terminal.", 500
+            
+    return render_template('change_password.html')
+
 @app.route('/logout')
 def logout():
-    session.pop('user', None) # Erases the user from the server's memory
+    session.clear() # Wipes the user, role, and reset locks
     return redirect(url_for('login')) # Kicks them back to the login screen
 
 # --- PROTECTED APP ROUTES ---
@@ -151,7 +313,6 @@ def get_recent():
             return jsonify([])  
         cur = conn.cursor()
         
-        # Grab the latest 10 entries instantly from PostgreSQL
         cur.execute("SELECT * FROM tracker_data ORDER BY log_date DESC, time_log DESC LIMIT 10;")
         records = cur.fetchall()
         
@@ -350,8 +511,7 @@ def get_ai_summary():
         Format the response in raw HTML using <li> tags. Do not use markdown. Do not include introductory text.
         """
         
-        model = genai.GenerativeModel('gemini-flash-latest')
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(model = 'gemini-flash-latest', contents=prompt)
         
         return jsonify({"summary": response.text})
     except Exception as e:

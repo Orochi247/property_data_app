@@ -45,10 +45,14 @@
             </div>
             
         </div>
-        <div class="modern-card p-2 mb-4 d-flex justify-content-center gap-2" id="mainNav">
-        <button class="nav-link swipe-btn active fw-bold px-4 py-2 rounded-pill" data-index="0">Data Entry</button>
-        <button class="nav-link swipe-btn fw-bold px-4 py-2 rounded-pill" data-index="1">Insights</button>
-        <button class="nav-link swipe-btn fw-bold px-4 py-2 rounded-pill" data-index="2">All Entries</button>
+        <div class="modern-card p-2 mb-4 d-flex justify-content-center gap-2" id="mainNav" style="overflow-x: auto; white-space: nowrap;">
+        <button class="nav-link swipe-btn active fw-bold px-3 py-2 rounded-pill" data-index="0">Data Entry</button>
+        <button class="nav-link swipe-btn fw-bold px-3 py-2 rounded-pill" data-index="1">Insights</button>
+        <button class="nav-link swipe-btn fw-bold px-3 py-2 rounded-pill" data-index="2">All Entries</button>
+        
+        {% if session.get('role') == 'admin' %}
+            <button class="nav-link swipe-btn text-danger fw-bold px-3 py-2 rounded-pill" data-index="3">Admin Panel</button>
+        {% endif %}
     </div>
 
     <div id="msg" class="mb-4 text-center"></div>
@@ -272,6 +276,48 @@
     </div>
 </div>
             </div>
+            {% if session.get('role') == 'admin' %}
+<div class="app-page">
+    <div class="modern-card p-4 border-top border-danger border-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 style="color: #dc3545; font-weight: 800; margin: 0;">Admin Control Center</h3>
+            <button class="btn btn-sm btn-outline-danger fw-bold rounded-pill" onclick="loadAdminData()">
+                🔄 Refresh
+            </button>
+        </div>
+
+        <h5 class="fw-bold text-secondary mb-3">Pending Agent Approvals</h5>
+        <div class="table-responsive mb-5">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Username</th>
+                        <th>Status</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="pendingUsersBody">
+                    </tbody>
+            </table>
+        </div>
+
+        <h5 class="fw-bold text-secondary mb-3">Password Reset Requests</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Username</th>
+                        <th>Alert</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="resetRequestsBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
             </div>   
 
         <div id="msg" class="mb-4 text-center"></div>
@@ -406,6 +452,84 @@ async function loadMasterLedger() {
         console.error("Ledger Load Error:", err);
         $('button[onclick="loadMasterLedger()"]').html('❌ Error');
     }
+}
+
+// --- ADMIN DASHBOARD LOGIC ---
+
+async function loadAdminData() {
+    try {
+        const res = await fetch('/get_admin_data');
+        const data = await res.json();
+        
+        if (data.status !== 'success') return; // Exit if unauthorized
+
+        // 1. Populate Pending Approvals
+        let pendingHtml = '';
+        if (data.pending.length === 0) {
+            pendingHtml = '<tr><td colspan="3" class="text-center text-muted">No pending approvals.</td></tr>';
+        } else {
+            data.pending.forEach(user => {
+                pendingHtml += `
+                <tr>
+                    <td class="fw-bold">${user.username}</td>
+                    <td><span class="badge bg-warning text-dark">Pending</span></td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-success fw-bold rounded-pill" onclick="approveAgent('${user.username}')">Approve</button>
+                    </td>
+                </tr>`;
+            });
+        }
+        $('#pendingUsersBody').html(pendingHtml);
+
+        // 2. Populate Reset Requests
+        let resetHtml = '';
+        if (data.resets.length === 0) {
+            resetHtml = '<tr><td colspan="3" class="text-center text-muted">No reset requests.</td></tr>';
+        } else {
+            data.resets.forEach(user => {
+                resetHtml += `
+                <tr>
+                    <td class="fw-bold">${user.username}</td>
+                    <td><span class="badge bg-danger">Locked Out</span></td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-danger fw-bold rounded-pill" onclick="resetAgentPassword('${user.username}')">Issue Temp Pass</button>
+                    </td>
+                </tr>`;
+            });
+        }
+        $('#resetRequestsBody').html(resetHtml);
+
+    } catch (err) {
+        console.error("Failed to load admin data", err);
+    }
+}
+
+async function approveAgent(username) {
+    if(!confirm(`Approve access for ${username}?`)) return;
+    
+    await fetch('/approve_agent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username })
+    });
+    
+    // Refresh the tables instantly
+    loadAdminData(); 
+    showToast(`Agent ${username} approved!`); // Uses your existing toast notification
+}
+
+async function resetAgentPassword(username) {
+    if(!confirm(`Reset password to Houzeo for ${username}?`)) return;
+    
+    await fetch('/admin_reset_password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username })
+    });
+    
+    // Refresh the tables instantly
+    loadAdminData();
+    showToast(`Password reset for ${username}`);
 }
 
     // --- MAIN JQUERY BLOCK ---
