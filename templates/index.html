@@ -556,6 +556,7 @@ async function resetAgentPassword(username) {
     }, {passive: true});
 
     // 3. The Smart Math
+// 3. The Smart Math
     function handleSwipe() {
         let diffX = touchstartX - touchendX;
         let diffY = touchstartY - touchendY;
@@ -576,19 +577,32 @@ async function resetAgentPassword(username) {
                 newIndex--;
             }
 
-            // Boundary Check: Make sure we don't swipe off the edge of the 3 pages
-            if (newIndex >= 0 && newIndex <= 2) {
+            // 👇 DYNAMIC BOUNDARY CHECK 👇
+            // Count exactly how many tabs are present on screen right now
+            let maxIndex = $('.swipe-btn').length - 1; 
+
+            // Allow navigation up to the dynamic maxIndex (2 for Agents, 3 for Admins)
+            if (newIndex >= 0 && newIndex <= maxIndex) {
                 // Automatically click the correct navigation button for them!
                 $(`.swipe-btn[data-index="${newIndex}"]`).trigger('click');
             }
         }
     }
-
     // --- SPA Navigation Slider Logic ---
 // --- SPA Navigation Slider Logic ---
 $('.swipe-btn').on('click', function() {
     $('.swipe-btn').removeClass('active');
     $(this).addClass('active');
+
+    // --- Inside your $('.swipe-btn').on('click', ...) listener ---
+
+// 1. Your existing code that changes the active tab class:
+$('.swipe-btn').removeClass('active');
+$(this).addClass('active');
+
+// 👇 ADD THIS LINE RIGHT HERE 👇
+// Smoothly centers the active pill on mobile screens automatically!
+this.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 
     let pageIndex = $(this).data('index');
     let slidePercentage = -(pageIndex * 100);
