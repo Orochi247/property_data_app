@@ -11,8 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    
-
 </head>
 <body>
     <div class="wave-background">
@@ -33,7 +31,6 @@
                     Houzeo<span style="color: #333; font-size: 1.2rem; vertical-align: middle;"> Autofill Tracker</span>
                 </h1>
             </div>
-            
 
             <div class="header-divider"></div>
 
@@ -59,7 +56,6 @@
 
     <div class="app-viewport">
         <div class="app-slider" id="appSlider">
-
             
             <div class="app-page">
             
@@ -322,8 +318,6 @@
 
         <div id="msg" class="mb-4 text-center"></div>
         
-
-        
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -555,7 +549,6 @@ async function resetAgentPassword(username) {
         handleSwipe();
     }, {passive: true});
 
-    // 3. The Smart Math
 // 3. The Smart Math
     function handleSwipe() {
         let diffX = touchstartX - touchendX;
@@ -595,7 +588,6 @@ $('.swipe-btn').on('click', function() {
     $(this).addClass('active');
 
     // --- Inside your $('.swipe-btn').on('click', ...) listener ---
-
 // 1. Your existing code that changes the active tab class:
 $('.swipe-btn').removeClass('active');
 $(this).addClass('active');
